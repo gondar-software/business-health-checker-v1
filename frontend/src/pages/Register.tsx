@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from "wouter";
+import { useLocation, Link } from "wouter";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,10 +22,11 @@ export default function Register() {
   const [state, setSignUpState] = useState<SignUpState>("email");
   const [code, setCode] = useState<string>("");
   const [googleSignup, setGoogleSignup] = useState<boolean>(true);
+  const [, navigate] = useLocation();
 
   useEffect(() => {
     if (isAuthenticated)
-      window.location.href = "/";
+      navigate("/");
   }, [isAuthenticated]);
 
   useEffect(() => {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { CheckCircle, BarChart3, TrendingUp, Users, Shield, ShoppingCart, DollarSign, Monitor, Heart, Settings, Leaf } from 'lucide-react';
+import { useAuth } from "@/hooks/useAuth";
 
 interface Dimension {
   name: string;
@@ -76,6 +77,7 @@ interface IndustryConfigs {
 type ViewType = 'setup' | 'dashboard' | string;
 
 const BusinessHealthDashboard: React.FC = () => {
+  const { logout } = useAuth();
   const [currentView, setCurrentView] = useState<ViewType>('setup');
   const [selectedSector, setSelectedSector] = useState<string>('private');
   const [selectedIndustry, setSelectedIndustry] = useState<string>('manufacturing');
@@ -746,7 +748,10 @@ const BusinessHealthDashboard: React.FC = () => {
 
     return (
       <div className="max-w-6xl mx-auto p-6">
-        <h2 className="text-3xl font-bold text-gray-800 mb-6">Client Assessment Setup</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-bold text-gray-800">Client Assessment Setup</h2>
+          <button onClick={logout} className="text-red-600 hover:text-red-800">Logout</button>
+        </div>
         
         {/* Client Information */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
