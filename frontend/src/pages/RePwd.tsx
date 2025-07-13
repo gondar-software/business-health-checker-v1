@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,11 +11,14 @@ import { apiRequest } from "@/lib/queryClient";
 import { RePwdState } from "@/types/enums"
 import { rePwdSchema1, rePwdSchema2 } from "@/shared/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Dialog } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 export default function RePwd() {
   const { toast } = useToast();
-  const [state, _] = useState<RePwdState>("email");
+  const [pwdState, setPwdState] = useState<RePwdState>("email");
+  const [code, setCode] = useState<string>("");
+  const [, navigate] = useLocation();
   
   const form1 = useForm({
     resolver: zodResolver(rePwdSchema1),
@@ -40,7 +43,7 @@ export default function RePwd() {
       });
     },
     onSuccess: () => {
-      
+      setPwdState("vcode");
     },
     onError: (err) => {
       if (err.message === '400: {"detail":"Email not found"}')
@@ -57,25 +60,60 @@ export default function RePwd() {
         });
     },
   });
-
-  const form2Mutation = useMutation({
-    mutationFn: async (data: typeof form2.getValues) => {
-      await apiRequest("POST", "/api/users/rcode", {
+  
+  const verifyCodeMutation = useMutation({
+    mutationFn: async (code: number) => {
+      const data = form1.getValues();
+      await apiRequest("POST", "/api/users/vrcode", {
         data: {
-          password: (data as any).pwd
+          email: data.email,
+          code: code,
+          password: null
         }
       });
     },
     onSuccess: () => {
-      toast({
-        title: "Verification Code Sent!",
-        description: "We sent verification code to your email. Please check your email.",
+      setPwdState("re-pwd");
+      setCode("");
+    },
+    onError: (err) => {
+      if (err.message.split(':')[0] === "429")
+        toast({
+          title: "Error",
+          description: "Too many verification attempts. Please resend a new code.",
+          variant: "destructive",
+        });
+      else toast({
+        title: "Error",
+        description: "Failed to send verification code. Please try again.",
+        variant: "destructive",
       });
     },
-    onError: (_) => {
+  });
+
+  const form2Mutation = useMutation({
+    mutationFn: async (data: { data1: typeof form1.getValues, data2: typeof form2.getValues }) => {
+      await apiRequest("POST", "/api/users/re-pwd", {
+        data: {
+          email: (data.data1() as any).email,
+          password: (data.data2 as any).pwd
+        }
+      });
+    },
+    onSuccess: () => {
+      form1.reset();
+      form2.reset();
+      toast({
+        title: "Success",
+        description: "Password reset successfully. You can now login with your new password.",
+      });
+      navigate("/login");
+    },
+    onError: (err) => {
+      console.error(err);
       toast({
         title: "Error",
-        description: "Failed to send message. Please try again.",
+        description: "Failed to reset password. Please try again.",
         variant: "destructive",
       });
     },
@@ -86,8 +124,29 @@ export default function RePwd() {
   };
 
   const onSubmit2 = (data: any) => {
-    form2Mutation.mutate(data);
+    form2Mutation.mutate({ data1: form1.getValues, data2: data });
   };
+
+  const onCodeClose = () => {
+    setPwdState("email");
+    setCode("");
+  }
+
+  const onCodeChange = (code: string) => {
+    if (code === "")
+    {
+      setCode("");
+      return;
+    }
+
+    const codeInt = Number(code);
+    if (codeInt)
+      setCode(String(codeInt));
+
+    if (codeInt >= 100000 && codeInt <= 999999) {
+      verifyCodeMutation.mutate(codeInt)
+    }
+  }
 
   return (
     <div className="pt-16 min-h-screen">
@@ -103,7 +162,7 @@ export default function RePwd() {
             {/* Contact Form */}
             <Card>
               <CardContent className="p-8">
-                {state !== "re-pwd" && <Form {...form1}>
+                {pwdState !== "re-pwd" && <Form {...form1}>
                   <form onSubmit={form1.handleSubmit(onSubmit1)} className="space-y-6">
                     <FormField
                       control={form1.control}
@@ -139,7 +198,7 @@ export default function RePwd() {
                     </div>
                   </form>
                 </Form>}
-                {state === "re-pwd" && <Form {...form2}>
+                {pwdState === "re-pwd" && <Form {...form2}>
                   <form onSubmit={form2.handleSubmit(onSubmit2)} className="space-y-6">
                     <FormField
                       control={form2.control}
@@ -193,8 +252,33 @@ export default function RePwd() {
             </Card>
           </div>
 
-          <Dialog>
-
+          <Dialog open={pwdState === "vcode"}>
+            <DialogContent onClose={onCodeClose} className="flex flex-col items-center">
+              <DialogTitle>
+                Verify Email
+              </DialogTitle>
+              <DialogDescription>
+                Please check email and enter code here to continue.
+              </DialogDescription>
+              <InputOTP 
+                maxLength={6}
+                minLength={6}
+                value={code}
+                onChange={onCodeChange}
+                disabled={verifyCodeMutation.isPending}
+              >
+                <InputOTPGroup>
+                  {[...Array(6)].map((_, index) => (
+                    <InputOTPSlot key={index} index={index} />
+                  ))}
+                </InputOTPGroup>
+              </InputOTP>
+              <DialogFooter>
+                <div className="underline text-blue-500 text-sm cursor-pointer" onClick={() => onSubmit1(form1.getValues())}>
+                  Resend Code
+                </div>
+              </DialogFooter>
+            </DialogContent>
           </Dialog>
         </div>
       </section>

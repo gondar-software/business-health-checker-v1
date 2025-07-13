@@ -64,6 +64,21 @@ async def verify_code_for_re_pwd(
             status_code=500,
             detail=f"An unexpected error occurred: {str(e)}"
         )
+    
+@users_router.post("/re-pwd")
+async def reset_password(
+    user_data: UserLogin,
+    user_service: UserService = Depends(get_user_service)
+):
+    try:
+        await user_service.reset_password(user_data)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"An unexpected error occurred: {str(e)}"
+        )
 
 @users_router.get("/")
 async def get_user(

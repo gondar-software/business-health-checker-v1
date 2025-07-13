@@ -99,3 +99,16 @@ class UserService:
             return new_token
         else:
             return
+        
+    async def reset_password(self, user_data: UserLogin):
+        existing_user = await self.repository.get_by_email(user_data.email)
+        if not existing_user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        if verify_password(user_data.password, existing_user.hashed_password):
+            raise HTTPException(status_code=400, detail="New password cannot be the same as the old password")
+
+        hashed_password = get_password_hash(user_data.password)
+        await self.repository.update_password(existing_user, hashed_password)
+        
+        return
