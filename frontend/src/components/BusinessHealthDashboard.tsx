@@ -588,15 +588,7 @@ const BusinessHealthDashboard: React.FC = () => {
     if (validScores.length === 0) return 0;
     return Math.round(validScores.reduce((sum, score) => sum + score, 0) / validScores.length);
   };
-
-  // Calculate overall health score
-  const calculateOverallScore = (): number => {
-    const scores = selectedAreas.map(key => calculateAreaScore(key));
-    const validScores = scores.filter(score => score > 0);
-    if (validScores.length === 0) return 0;
-    return Math.round(validScores.reduce((sum, score) => sum + score, 0) / validScores.length);
-  };
-
+  
   // Get RAG status based on audit opinion levels
   const getRAGStatus = (score: number): RAGStatus => {
     if (score >= 75) return { 
