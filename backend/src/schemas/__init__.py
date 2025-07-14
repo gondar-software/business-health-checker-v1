@@ -1,5 +1,6 @@
 from .user import *
 from .jwt import *
+from .info import *
 
 __all__ = [
     "UserBase",
@@ -8,5 +9,7 @@ __all__ = [
     "UserData",
     "VerificationCode",
     "Token",
+    "InfoBase",
+    "InfoOut",
     "oauth2_scheme",
 ]
