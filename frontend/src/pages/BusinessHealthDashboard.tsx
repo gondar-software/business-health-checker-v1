@@ -124,7 +124,7 @@ const BusinessHealthDashboard: React.FC = () => {
           questions: [
             'Is there a clearly defined organizational structure with roles, responsibilities, and reporting lines?',
             'Are strategic objectives and goals clearly communicated throughout the organization?',
-            'Are leadership decisions transparent and consistently applied?',
+            'Are there terms of references for the Board and its sub-committees?',
             'Is there a process for regular review and evaluation of leadership performance?',
             'Does leadership actively promote a culture of accountability and ethical conduct?'
           ]
@@ -214,7 +214,7 @@ const BusinessHealthDashboard: React.FC = () => {
         efficiency: {
           name: 'Efficiency',
           questions: [
-            'Is the financial close process efficient and streamlined?',
+            'Is the month-end process efficient and streamlined?',
             'Are financial reports easily accessible and understandable to relevant stakeholders?',
             'Is there a clear process for expense approval and reconciliation?',
             'Are financial resources allocated efficiently to support business operations and growth?',
@@ -234,7 +234,7 @@ const BusinessHealthDashboard: React.FC = () => {
             'Is there a formal process for cash flow forecasting and monitoring?',
             'Are working capital policies and procedures well-defined and implemented?',
             'Does the organization actively manage its accounts receivable and accounts payable?',
-            'Is there a strategy in place for optimizing inventory levels (if applicable)?'
+            'Does the organisation undertake scenario analysis and short-term liquidity stress testing?'
           ]
         },
         risk: {
@@ -305,7 +305,7 @@ const BusinessHealthDashboard: React.FC = () => {
             'Is there a documented procurement policy and clear procedures for supplier selection?',
             'Does the organization have a formal process for supplier performance evaluation and management?',
             'Is there a centralized system for managing supplier contracts and relationships?',
-            'Does the organization engage in strategic sourcing to optimize costs and quality?',
+            'Does the organisation undertake due diligence of new suppliers?',
             'Is there a clear process for managing and resolving supplier disputes?'
           ]
         },
@@ -314,7 +314,7 @@ const BusinessHealthDashboard: React.FC = () => {
           questions: [
             'Are there identified single points of failure in the supply chain?',
             'Are there clear procedures for assessing and mitigating supplier risks (e.g., financial instability, ethical concerns)?',
-            'Is the organization compliant with relevant procurement regulations and ethical sourcing standards?',
+            'Does the organisation have a robust process for managing changes to supplier details?',
             'Are there contingency plans for supply chain disruptions?',
             'Is there adequate due diligence performed on new suppliers?'
           ]
@@ -386,7 +386,7 @@ const BusinessHealthDashboard: React.FC = () => {
           questions: [
             'Are there adequate cybersecurity measures in place to protect sensitive data and systems?',
             'Is there a disaster recovery plan for critical IT systems?',
-            'Are there clear policies and procedures for data privacy and compliance (e.g., GDPR, HIPAA)?',
+            'Are there clear policies and procedures for data privacy and compliance (e.g., UK GDPR)?',
             'Is the organization overly reliant on legacy systems that pose a risk to operations?',
             'Are there clear processes for managing IT vendor relationships and service level agreements?'
           ]
@@ -411,7 +411,7 @@ const BusinessHealthDashboard: React.FC = () => {
           name: 'Maturity',
           questions: [
             'Is there a documented compliance and risk management framework in place?',
-            'Are all relevant laws, regulations, and industry standards identified and monitored?',
+            'Is there a risk register in place?',
             'Is there a clear process for identifying, assessing, and prioritizing risks across the organization?',
             'Are employees regularly trained on compliance requirements and risk management procedures?',
             'Is there a system for tracking and reporting compliance and risk management activities?'
