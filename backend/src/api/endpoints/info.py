@@ -37,7 +37,7 @@ async def create_info(
         raise HTTPException(status_code=500, detail=str(e))
     
 @infos_router.put("/")
-async def update_info(
+async def create_or_update_info(
     info_data: InfoBase,
     user_data: UserData = Depends(get_current_user),
     info_service: InfoService = Depends(get_info_service)
@@ -46,7 +46,7 @@ async def update_info(
     Update information for the current user.
     """
     try:
-        await info_service.update_info(user_data, info_data)
+        await info_service.create_or_update_info(user_data, info_data)
     except HTTPException:
         raise
     except Exception as e:

@@ -22,7 +22,12 @@ class InfoService:
         new_info = Info(user_id=user_data.id, **info_data.dict())
         await self.repository.create_info(new_info)
     
-    async def update_info(self, user_data: UserData, info_data: InfoBase):
-        info = await self.repository.update_info(user_data.id, info_data.dict())
+    async def create_or_update_info(self, user_data: UserData, info_data: InfoBase):
+        existing_info = await self.repository.get_info_by_user_id(user_data.id)
+        if not existing_info:
+            new_info = Info(user_id=user_data.id, **info_data.dict())
+            await self.repository.create_info(new_info)
+        else:
+            info = await self.repository.update_info(user_data.id, info_data.dict())
         if not info:
             raise HTTPException(status_code=404, detail="Info not found for the user")
