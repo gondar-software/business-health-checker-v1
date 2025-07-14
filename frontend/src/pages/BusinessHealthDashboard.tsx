@@ -9,7 +9,7 @@ const BusinessHealthDashboard: React.FC = () => {
   const [selectedAreas, setSelectedAreas] = useState<string[]>(['governance', 'strategy', 'financial', 'cashflow', 'revenue', 'procurement', 'people', 'technology', 'compliance', 'customer', 'operational', 'sustainability']);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 mt-16">
       {currentView === 'setup' ? (
         <ClientSetupView 
           setCurrentView={setCurrentView} 
