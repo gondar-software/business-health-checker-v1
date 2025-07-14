@@ -3,7 +3,6 @@ import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CheckCircle } from 'lucide-react';
-import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { businessAreas } from "@/constants/questions";
 import { sectorConfig } from "@/constants/sectorConfigs";
@@ -14,7 +13,6 @@ import { useInfo } from "@/hooks/useInfo";
 import { useToast } from '@/hooks/use-toast';
 
 const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setSelectedAreas, selectedAreas }) => {
-    const { logout } = useAuth();
     const [selectedSector, setSelectedSector] = useState<string>('private');
     const [selectedIndustry, setSelectedIndustry] = useState<string>('manufacturing');
     const { info, createOrUpdateInfo } = useInfo();
@@ -124,7 +122,6 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
         <div className="max-w-6xl mx-auto p-6">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-3xl font-bold text-gray-800">Client Assessment Setup</h2>
-                <button onClick={logout} className="text-red-600 hover:text-red-800">Logout</button>
             </div>
 
             <form onSubmit={handleSubmit(onSaveClientInfo)}>
