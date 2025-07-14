@@ -1,24 +1,36 @@
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { CheckCircle } from 'lucide-react';
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { businessAreas } from "@/constants/questions";
 import { sectorConfig } from "@/constants/sectorConfigs";
 import { industryConfig } from "@/constants/industryConfigs";
-import { ClientInfo } from "@/types/params";
 import { ClientSetupViewParams } from "@/types/params";
+import { clientInfoSchema } from "@/types/schemas";
 
 const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setSelectedAreas, selectedAreas }) => {
     const { logout } = useAuth();
     const [selectedSector, setSelectedSector] = useState<string>('private');
     const [selectedIndustry, setSelectedIndustry] = useState<string>('manufacturing');
-    const [clientInfo, setClientInfo] = useState<ClientInfo>({
-        name: 'ABC Corporation Ltd',
-        sector: 'Private',
-        industry: 'Manufacturing',
-        size: 'Medium (50-250 employees)',
-        turnover: '£1M - £5M',
+
+    const clientInfoForm = useForm({
+        resolver: zodResolver(clientInfoSchema),
+        defaultValues: {
+            name: 'ABC Corporation Ltd',
+            sector: sectorConfig[selectedSector].name,
+            industry: industryConfig[selectedIndustry].name,
+            size: 'Medium (50-250 employees)',
+            turnover: '£1M - £5M',
+        },
     });
+    const { register, watch, setValue, handleSubmit } = clientInfoForm;
+
+    // Watch these for live updates and default values
+    const watchName = watch('name');
+    const watchSize = watch('size');
+    const watchTurnover = watch('turnover');
 
     const handleAreaToggle = (areaKey: string): void => {
         setSelectedAreas(prev =>
@@ -54,9 +66,9 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
         }
     };
 
-    const onSaveClientInfo = () => {
-
-    }
+    const onSaveClientInfo = (data: any) => {
+        console.log("Client Info Saved:", data);
+    };
 
     return (
         <div className="max-w-6xl mx-auto p-6">
@@ -65,124 +77,125 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                 <button onClick={logout} className="text-red-600 hover:text-red-800">Logout</button>
             </div>
 
-            {/* Client Information */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Client Information</h3>
+            <form onSubmit={handleSubmit(onSaveClientInfo)}>
+                {/* Client Information */}
+                <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Client Information</h3>
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-4'>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Client Name</label>
+                            <input
+                                {...register('name', { required: true })}
+                                type="text"
+                                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Enter client organization name"
+                                defaultValue={watchName}
+                            />
+                        </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Client Name</label>
-                        <input
-                            type="text"
-                            value={clientInfo.name}
-                            onChange={(e) => setClientInfo({ ...clientInfo, name: e.target.value })}
-                            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Enter client organization name"
-                        />
-                    </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Organization Size</label>
+                            <select
+                                {...register('size', { required: true })}
+                                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                defaultValue={watchSize}
+                            >
+                                <option value="Small (1-50 employees)">Small (1-50 employees)</option>
+                                <option value="Medium (50-250 employees)">Medium (50-250 employees)</option>
+                                <option value="Large (250-1000 employees)">Large (250-1000 employees)</option>
+                                <option value="Enterprise (1000+ employees)">Enterprise (1000+ employees)</option>
+                            </select>
+                        </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Organization Size</label>
-                        <select
-                            value={clientInfo.size}
-                            onChange={(e) => setClientInfo({ ...clientInfo, size: e.target.value })}
-                            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="Small (1-50 employees)">Small (1-50 employees)</option>
-                            <option value="Medium (50-250 employees)">Medium (50-250 employees)</option>
-                            <option value="Large (250-1000 employees)">Large (250-1000 employees)</option>
-                            <option value="Enterprise (1000+ employees)">Enterprise (1000+ employees)</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Organization Turnover</label>
-                        <select
-                            value={clientInfo.size}
-                            onChange={(e) => setClientInfo({ ...clientInfo, turnover: e.target.value })}
-                            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="Under £1M">Under £1M</option>
-                            <option value="£1M - £5M">£1M - £5M</option>
-                            <option value="£5M - £25M">£5M - £25M</option>
-                            <option value="£25M - £100M">£25M - £100M</option>
-                            <option value="£100M - £500M">£100M - £500M</option>
-                            <option value="Over £500M">Over £500M</option>
-                        </select>
-                    </div>
-
-                    <div className="flex flex-col justify-end w-full items-end">
-                        <Button className='w-1/4' onClick={onSaveClientInfo}>
-                            Save
-                        </Button>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Organization Turnover</label>
+                            <select
+                                {...register('turnover', { required: true })}
+                                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                defaultValue={watchTurnover}
+                            >
+                                <option value="Under £1M">Under £1M</option>
+                                <option value="£1M - £5M">£1M - £5M</option>
+                                <option value="£5M - £25M">£5M - £25M</option>
+                                <option value="£25M - £100M">£25M - £100M</option>
+                                <option value="£100M - £500M">£100M - £500M</option>
+                                <option value="Over £500M">Over £500M</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            {/* Sector Selection */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Sector Selection</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {Object.entries(sectorConfig).map(([key, sector]) => (
-                        <div
-                            key={key}
-                            onClick={() => {
-                                setSelectedSector(key);
-                                setClientInfo({ ...clientInfo, sector: sector.name });
-                            }}
-                            className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${selectedSector === key
+                {/* Sector Selection */}
+                <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Sector Selection</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {Object.entries(sectorConfig).map(([key, sector]) => (
+                            <div
+                                key={key}
+                                onClick={() => {
+                                    setSelectedSector(key);
+                                    setValue("sector", sector.name);
+                                }}
+                                className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${selectedSector === key
                                     ? 'border-blue-500 bg-blue-50'
                                     : 'border-gray-200 hover:border-gray-300'
-                                }`}
-                        >
-                            <h4 className="font-semibold text-gray-800 mb-2">{sector.name}</h4>
-                            <p className="text-sm text-gray-600 mb-3">Key Priorities:</p>
-                            <ul className="text-xs text-gray-500">
-                                {sector.priorities.map((priority, index) => (
-                                    <li key={index}>• {priority}</li>
-                                ))}
-                            </ul>
-                            {selectedSector === key && (
-                                <div className="mt-3 text-xs text-blue-600 font-medium">
-                                    ✓ Selected Sector
-                                </div>
-                            )}
-                        </div>
-                    ))}
+                                    }`}
+                            >
+                                <h4 className="font-semibold text-gray-800 mb-2">{sector.name}</h4>
+                                <p className="text-sm text-gray-600 mb-3">Key Priorities:</p>
+                                <ul className="text-xs text-gray-500">
+                                    {sector.priorities.map((priority, index) => (
+                                        <li key={index}>• {priority}</li>
+                                    ))}
+                                </ul>
+                                {selectedSector === key && (
+                                    <div className="mt-3 text-xs text-blue-600 font-medium">
+                                        ✓ Selected Sector
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
 
-            {/* Industry Selection */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Industry Selection</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {Object.entries(industryConfig).map(([key, industry]) => (
-                        <div
-                            key={key}
-                            onClick={() => {
-                                setSelectedIndustry(key);
-                                setClientInfo({ ...clientInfo, industry: industry.name });
-                            }}
-                            className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${selectedIndustry === key
+                {/* Industry Selection */}
+                <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Industry Selection</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {Object.entries(industryConfig).map(([key, industry]) => (
+                            <div
+                                key={key}
+                                onClick={() => {
+                                    setSelectedIndustry(key);
+                                    setValue("industry", industry.name);
+                                }}
+                                className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${selectedIndustry === key
                                     ? 'border-green-500 bg-green-50'
                                     : 'border-gray-200 hover:border-gray-300'
-                                }`}
-                        >
-                            <h4 className="font-semibold text-gray-800 mb-2 text-sm">{industry.name}</h4>
-                            <p className="text-xs text-gray-600 mb-2">Critical Areas:</p>
-                            <div className="text-xs text-gray-500">
-                                {industry.criticalAreas.slice(0, 2).map(areaKey => businessAreas[areaKey]?.name).join(', ')}
-                                {industry.criticalAreas.length > 2 && '...'}
-                            </div>
-                            {selectedIndustry === key && (
-                                <div className="mt-3 text-xs text-green-600 font-medium">
-                                    ✓ Selected Industry
+                                    }`}
+                            >
+                                <h4 className="font-semibold text-gray-800 mb-2 text-sm">{industry.name}</h4>
+                                <p className="text-xs text-gray-600 mb-2">Critical Areas:</p>
+                                <div className="text-xs text-gray-500">
+                                    {industry.criticalAreas.slice(0, 2).map(areaKey => businessAreas[areaKey]?.name).join(', ')}
+                                    {industry.criticalAreas.length > 2 && '...'}
                                 </div>
-                            )}
-                        </div>
-                    ))}
+                                {selectedIndustry === key && (
+                                    <div className="mt-3 text-xs text-green-600 font-medium">
+                                        ✓ Selected Industry
+                                    </div>
+                                )}
+                            </div>
+                        ))}
+                    </div>
                 </div>
-            </div>
+
+                <div className="flex flex-col justify-end w-full items-end mb-6">
+                    <Button type="submit" className="w-1/4">
+                        Save
+                    </Button>
+                </div>
+            </form>
 
             {/* Business Areas Selection */}
             <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -236,8 +249,8 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                                 key={key}
                                 onClick={() => handleAreaToggle(key)}
                                 className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${isSelected
-                                        ? 'border-blue-500 bg-blue-50'
-                                        : 'border-gray-200 hover:border-gray-300'
+                                    ? 'border-blue-500 bg-blue-50'
+                                    : 'border-gray-200 hover:border-gray-300'
                                     }`}
                             >
                                 <div className="flex items-start justify-between mb-2">
@@ -296,10 +309,11 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                     <div>
                         <h4 className="font-medium text-blue-800 mb-2">Client Details:</h4>
                         <ul className="text-blue-700 space-y-1">
-                            <li>• <strong>Client:</strong> {clientInfo.name}</li>
-                            <li>• <strong>Sector:</strong> {sectorConfig[selectedSector]?.name}</li>
-                            <li>• <strong>Industry:</strong> {industryConfig[selectedIndustry]?.name}</li>
-                            <li>• <strong>Size:</strong> {clientInfo.size}</li>
+                            <li>• <strong>Client:</strong> {clientInfoForm.getValues().name}</li>
+                            <li>• <strong>Sector:</strong> {clientInfoForm.getValues().sector}</li>
+                            <li>• <strong>Industry:</strong> {clientInfoForm.getValues().industry}</li>
+                            <li>• <strong>Size:</strong> {clientInfoForm.getValues().size}</li>
+                            <li>• <strong>Turnover:</strong> {clientInfoForm.getValues().turnover}</li>
                         </ul>
                     </div>
                     <div>
@@ -326,8 +340,8 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                         onClick={() => setCurrentView('dashboard')}
                         disabled={selectedAreas.length === 0}
                         className={`px-6 py-3 rounded-lg font-medium transition-colors ${selectedAreas.length === 0
-                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                : 'bg-blue-500 text-white hover:bg-blue-600'
+                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            : 'bg-blue-500 text-white hover:bg-blue-600'
                             }`}
                     >
                         Start Assessment →
