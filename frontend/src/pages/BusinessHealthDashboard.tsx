@@ -26,6 +26,7 @@ interface ClientInfo {
   sector: string;
   industry: string;
   size: string;
+  turnover: string;
 }
 
 interface AssessmentResponse {
@@ -86,7 +87,8 @@ const BusinessHealthDashboard: React.FC = () => {
     name: 'ABC Corporation Ltd',
     sector: 'Private',
     industry: 'Manufacturing',
-    size: 'Medium (50-250 employees)'
+    size: 'Medium (50-250 employees)',
+    turnover: '£1M - £5M',
   });
 
   // Update sample assessment data to use 0-10 scale
@@ -782,6 +784,22 @@ const BusinessHealthDashboard: React.FC = () => {
                 <option value="Enterprise (1000+ employees)">Enterprise (1000+ employees)</option>
               </select>
             </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Organization Turnover</label>
+              <select
+                value={clientInfo.size}
+                onChange={(e) => setClientInfo({...clientInfo, turnover: e.target.value})}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="Under £1M">Under £1M</option>
+                <option value="£1M - £5M">£1M - £5M</option>
+                <option value="£5M - £25M">£5M - £25M</option>
+                <option value="£25M - £100M">£25M - £100M</option>
+                <option value="£100M - £500M">£100M - £500M</option>
+                <option value="Over £500M">Over £500M</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -1149,7 +1167,7 @@ const BusinessHealthDashboard: React.FC = () => {
               <span>Assessment Progress</span>
               <span>
                 {Object.values(assessmentData[areaKey] || {}).flatMap(dim => Object.values(dim)).length} 
-                of {Object.values(area.dimensions).reduce((total, dim) => total + dim.questions.length, 0)} questions completed
+                &nbsp;of {Object.values(area.dimensions).reduce((total, dim) => total + dim.questions.length, 0)} questions completed
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
