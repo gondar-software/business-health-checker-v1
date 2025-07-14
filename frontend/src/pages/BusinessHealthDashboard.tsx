@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { CheckCircle, BarChart3, TrendingUp, Users, Shield, ShoppingCart, DollarSign, Monitor, Heart, Settings, Leaf } from 'lucide-react';
 import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 
 interface Dimension {
   name: string;
@@ -748,6 +749,10 @@ const BusinessHealthDashboard: React.FC = () => {
       }
     };
 
+    const onSaveClientInfo = () => {
+      
+    }
+
     return (
       <div className="max-w-6xl mx-auto p-6">
         <div className="flex justify-between items-center mb-6">
@@ -799,6 +804,12 @@ const BusinessHealthDashboard: React.FC = () => {
                 <option value="£100M - £500M">£100M - £500M</option>
                 <option value="Over £500M">Over £500M</option>
               </select>
+            </div>
+
+            <div className="flex flex-col justify-end w-full items-end">
+                <Button className='w-1/4' onClick={onSaveClientInfo}>
+                  Save
+                </Button>
             </div>
           </div>
         </div>
