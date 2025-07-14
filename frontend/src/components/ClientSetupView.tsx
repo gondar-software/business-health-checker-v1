@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CheckCircle } from 'lucide-react';
@@ -9,15 +10,39 @@ import { sectorConfig } from "@/constants/sectorConfigs";
 import { industryConfig } from "@/constants/industryConfigs";
 import { ClientSetupViewParams } from "@/types/params";
 import { clientInfoSchema } from "@/types/schemas";
+import { useInfo } from "@/hooks/useInfo";
+import { useToast } from '@/hooks/use-toast';
 
 const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setSelectedAreas, selectedAreas }) => {
     const { logout } = useAuth();
     const [selectedSector, setSelectedSector] = useState<string>('private');
     const [selectedIndustry, setSelectedIndustry] = useState<string>('manufacturing');
+    const { info, createOrUpdateInfo } = useInfo();
+    const { toast } = useToast();
+
+    useEffect(() => {
+        if (info) {
+            const sectorKey = Object.keys(sectorConfig).find(
+                key => sectorConfig[key].name === info.sector
+            );
+            const industryKey = Object.keys(industryConfig).find(
+                key => industryConfig[key].name === info.industry
+            );
+    
+            if (sectorKey) setSelectedSector(sectorKey);
+            if (industryKey) setSelectedIndustry(industryKey);
+    
+            clientInfoForm.reset({
+                ...info,
+                sector: info.sector,
+                industry: info.industry,
+            });
+        }
+    }, [info]);
 
     const clientInfoForm = useForm({
         resolver: zodResolver(clientInfoSchema),
-        defaultValues: {
+        defaultValues: info || {
             name: 'ABC Corporation Ltd',
             sector: sectorConfig[selectedSector].name,
             industry: industryConfig[selectedIndustry].name,
@@ -65,9 +90,34 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                 break;
         }
     };
+    
+    const saveClientMutation = useMutation({
+        mutationFn: async (data: any) => {
+            await createOrUpdateInfo({
+                name: data.name,
+                sector: data.sector,
+                industry: data.industry,
+                size: data.size,
+                turnover: data.turnover,
+            });
+        },
+        onSuccess: () => {
+            toast({
+                title: "Success",
+                description: "Client information saved successfully."
+            });
+        },
+        onError: () => {
+            toast({
+                title: "Error",
+                description: "Failed to save client information.",
+                variant: "destructive",
+            });
+        }
+    });
 
     const onSaveClientInfo = (data: any) => {
-        console.log("Client Info Saved:", data);
+        saveClientMutation.mutate(data);
     };
 
     return (

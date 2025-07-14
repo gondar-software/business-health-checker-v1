@@ -17,4 +17,4 @@ class User(Base):
     hashed_password: Mapped[str] = mapped_column(String)
     created_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
 
-    user: Mapped["Info"] = relationship("Info", back_populates="user", uselist=False)
+    info: Mapped["Info"] = relationship("Info", back_populates="user", uselist=False)
