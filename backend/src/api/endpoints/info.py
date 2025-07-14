@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from src.services import InfoService
 from src.schemas import UserData, InfoBase, InfoOut
-from src.dependencies import get_current_user
+from src.dependencies import get_current_user, get_info_service
 
 infos_router = APIRouter()
 
 @infos_router.get("/", response_model=InfoOut)
 async def get_info(
     user_data: UserData = Depends(get_current_user),
-    info_service: InfoService = Depends(InfoService)
+    info_service: InfoService = Depends(get_info_service)
 ):
     """
     Get information for the current user.
@@ -24,13 +24,13 @@ async def get_info(
 async def create_info(
     info_data: InfoBase,
     user_data: UserData = Depends(get_current_user),
-    info_service: InfoService = Depends(InfoService)
+    info_service: InfoService = Depends(get_info_service)
 ):
     """
     Create information for the current user.
     """
     try:
-        return await info_service.create_info(user_data, info_data)
+        await info_service.create_info(user_data, info_data)
     except HTTPException:
         raise
     except Exception as e:
@@ -40,13 +40,13 @@ async def create_info(
 async def update_info(
     info_data: InfoBase,
     user_data: UserData = Depends(get_current_user),
-    info_service: InfoService = Depends(InfoService)
+    info_service: InfoService = Depends(get_info_service)
 ):
     """
     Update information for the current user.
     """
     try:
-        return await info_service.update_info(user_data, info_data)
+        await info_service.update_info(user_data, info_data)
     except HTTPException:
         raise
     except Exception as e:
