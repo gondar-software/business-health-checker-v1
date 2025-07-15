@@ -84,9 +84,12 @@ export interface ClientSetupViewParams {
 export interface AssessmentViewParams {
   areaKey: string;
   setCurrentView: React.Dispatch<React.SetStateAction<ViewType>>;
+  assessmentData: AssessmentData;
+  setAssessmentData: React.Dispatch<React.SetStateAction<AssessmentData>>;
 }
 
 export interface DashboardViewParams {
   setCurrentView: React.Dispatch<React.SetStateAction<ViewType>>;
   selectedAreas: string[];
+  assessmentData: AssessmentData;
 }

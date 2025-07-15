@@ -2,7 +2,7 @@ import React from 'react';
 import { DashboardViewParams } from '@/types/params';
 import { businessAreas } from '@/constants/questions';
 
-const DashboardView: React.FC<DashboardViewParams> = ({ setCurrentView, selectedAreas }) => {
+const DashboardView: React.FC<DashboardViewParams> = ({ setCurrentView, selectedAreas, assessmentData }) => {
     return (
       <div className="max-w-6xl mx-auto p-6">
         <div className="mb-8">
@@ -37,7 +37,8 @@ const DashboardView: React.FC<DashboardViewParams> = ({ setCurrentView, selected
                   
                   <div className="mb-4">
                     <div className="w-full bg-gray-200 rounded-full h-3">
-                      <div className="h-3 rounded-full bg-blue-500" style={{ width: '0%' }}></div>
+                      <div className="h-3 rounded-full bg-blue-500" style={{ width: `${(Object.values(assessmentData[key] || {}).flatMap(dim => Object.values(dim)).length /
+                                    Object.values(area.dimensions).reduce((total, dim) => total + dim.questions.length, 0)) * 100}%` }}></div>
                     </div>
                   </div>
 

@@ -1,20 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { businessAreas } from "@/constants/questions";
-import { AssessmentViewParams, DimensionData, RAGStatus, AssessmentData } from "@/types/params";
+import { AssessmentViewParams, DimensionData, RAGStatus } from "@/types/params";
 
 // Assessment View Component
-const AssessmentView: React.FC<AssessmentViewParams> = ({ areaKey, setCurrentView }) => {
+const AssessmentView: React.FC<AssessmentViewParams> = ({ areaKey, setCurrentView, assessmentData, setAssessmentData }) => {
     const area = businessAreas[areaKey];
     const IconComponent = area.icon;
-    
-    // Update sample assessment data to use 0-10 scale
-    const [assessmentData, setAssessmentData] = useState<AssessmentData>({
-        governance: {
-            maturity: { 0: 7, 1: 8, 2: 6, 3: 7, 4: 8 },
-            risk: { 0: 5, 1: 6, 2: 7, 3: 8, 4: 7 },
-            efficiency: { 0: 6, 1: 7, 2: 5, 3: 6, 4: 7 }
-        }
-    });
 
     // Calculate scores for each dimension using 0-10 scale
     const calculateDimensionScore = (areaKey: string, dimensionKey: string): number => {
