@@ -1,13 +1,13 @@
 from pydantic import BaseModel
 
-class InfoBase(BaseModel):
+class CustomerBase(BaseModel):
     name: str
     size: str
     sector: str
     industry: str
     turnover: str
 
-class InfoOut(InfoBase):
+class CustomerOut(CustomerBase):
     id: int
 
     model_config = { "from_attributes": True }

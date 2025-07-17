@@ -1,15 +1,22 @@
 from .user import *
 from .jwt import *
-from .info import *
+from .customer import *
+from .assessment import *
+from .assessor import *
 
 __all__ = [
     "UserBase",
     "UserCreate",
     "UserLogin",
+    "UserInfo",
     "UserData",
     "VerificationCode",
     "Token",
-    "InfoBase",
-    "InfoOut",
+    "CustomerBase",
+    "CustomerOut",
+    "AssessmentBase",
+    "AssessmentOut",
+    "AssessorBase",
+    "AssessorOut",
     "oauth2_scheme",
 ]

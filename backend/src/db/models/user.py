@@ -1,13 +1,7 @@
-from __future__ import annotations
-
-from typing import TYPE_CHECKING
 from sqlalchemy import String, Integer, DateTime, func
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
 from .base import Base
-
-if TYPE_CHECKING:
-    from .info import Info
 
 class User(Base):
     __tablename__ = "users"
@@ -16,5 +10,3 @@ class User(Base):
     email: Mapped[str] = mapped_column(String, unique=True, index=True)
     hashed_password: Mapped[str] = mapped_column(String)
     created_time: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=func.now())
-
-    info: Mapped["Info"] = relationship("Info", back_populates="user", uselist=False)

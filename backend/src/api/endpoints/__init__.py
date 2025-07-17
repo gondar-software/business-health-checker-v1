@@ -1,7 +1,7 @@
 from .user import *
-from .info import *
+from .customer import *
 
 __all__ = [
     "users_router",
-    "infos_router",
+    "customers_router",
 ]

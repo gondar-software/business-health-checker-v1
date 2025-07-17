@@ -1,7 +1,11 @@
 from .user import *
-from .info import *
+from .customer import *
+from .assessor import *
+from .assessment import *
 
 __all__ = [
     "UserRepository",
-    "InfoRepository"
+    "CustomerRepository",
+    "AssessorRepository",
+    "AssessmentRepository"
 ]

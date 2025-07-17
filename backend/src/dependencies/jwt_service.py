@@ -1,6 +1,6 @@
 from fastapi import Depends, HTTPException, status
 from jose import JWTError, jwt
-from src.schemas import oauth2_scheme, UserData
+from src.schemas import oauth2_scheme, UserInfo
 from src.config import settings
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
@@ -16,7 +16,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         if not all(field in payload for field in required_fields):
             raise credentials_exception
             
-        return UserData(
+        return UserInfo(
             email=payload["email"],
             id=payload["id"]
         )

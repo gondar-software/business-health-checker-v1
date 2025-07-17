@@ -1,6 +1,6 @@
 from fastapi import Request, APIRouter, Depends, HTTPException
 from src.services import UserService, google_redirect, get_user_data_from_google_token
-from src.schemas import UserLogin, UserData, UserBase, VerificationCode, Token
+from src.schemas import UserLogin, UserData, UserInfo, UserBase, VerificationCode, Token
 from src.dependencies import get_user_service, get_current_user
 
 users_router = APIRouter()
@@ -80,11 +80,20 @@ async def reset_password(
             detail=f"An unexpected error occurred: {str(e)}"
         )
 
-@users_router.get("/")
+@users_router.get("/", response_model=UserData)
 async def get_user(
-    user: UserData = Depends(get_current_user)
+    user: UserInfo = Depends(get_current_user),
+    user_service: UserService = Depends(get_user_service)
 ):
-    return user
+    try:
+        return await user_service.get_user_data(user.email)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"An unexpected error occurred: {str(e)}"
+        )
 
 @users_router.post("/login", response_model=Token)
 async def login(
