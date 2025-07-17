@@ -8,5 +8,5 @@ __all__ = [
     "UserService",
     "CustomerService",
     "google_redirect",
-    "get_user_data_from_google_token",
+    "get_user_info_from_google_token",
 ]

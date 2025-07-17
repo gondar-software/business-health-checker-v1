@@ -1,5 +1,5 @@
 from fastapi import Request, APIRouter, Depends, HTTPException
-from src.services import UserService, google_redirect, get_user_data_from_google_token
+from src.services import UserService, google_redirect, get_user_info_from_google_token
 from src.schemas import UserLogin, UserData, UserInfo, UserBase, VerificationCode, Token
 from src.dependencies import get_user_service, get_current_user
 
@@ -144,8 +144,8 @@ async def get_user_by_google(
     user_service: UserService = Depends(get_user_service)
 ):
     try:
-        user_data = await get_user_data_from_google_token(request)
-        token = await user_service.get_token_by_google(user_data["email"])
+        user_info = await get_user_info_from_google_token(request)
+        token = await user_service.get_token_by_google(user_info["email"])
         return token
     except HTTPException:
         raise

@@ -19,7 +19,7 @@ async def google_redirect(request: Request, login=True):
     redirect_uri = settings.GOOGLE_LOGIN_REDIRECT_URI if login else settings.GOOGLE_SIGNUP_REDIRECT_URI
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
-async def get_user_data_from_google_token(request: Request):
+async def get_user_info_from_google_token(request: Request):
     try:
         access_token = await oauth.google.authorize_access_token(request)
     except OAuthError:
