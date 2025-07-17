@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function Header() {
-    const { isAuthenticated, logout } = useAuth();
+    const { user, isAuthenticated, logout } = useAuth();
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
@@ -20,8 +20,13 @@ export default function Header() {
                                 Business Health Checker
                             </span>
                         </Link>
+                        {(user && (!user.user_idx || user.user_idx === -1)) && user.customer && (
+                            <Link href="/invite" className="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">
+                                Invite Assessor
+                            </Link>
+                        )}
                     </div>
-                    <div>
+                    <div className="flex flex-row items-center space-x-4">
                         {isAuthenticated && (
                             <div>
                                 <Button
