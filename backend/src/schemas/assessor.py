@@ -2,7 +2,6 @@ from pydantic import BaseModel
 
 class AssessorBase(BaseModel):
     name: str
-    email: str
     role: str
 
 class AssessorOut(AssessorBase):

@@ -6,6 +6,7 @@ class Customer(Base):
     __tablename__ = "customers"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    logo_url: Mapped[str] = mapped_column(String, nullable=True)
     name: Mapped[str] = mapped_column(String)
     sector: Mapped[str] = mapped_column(String)
     industry: Mapped[str] = mapped_column(String)

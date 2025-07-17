@@ -6,6 +6,7 @@ class CustomerBase(BaseModel):
     sector: str
     industry: str
     turnover: str
+    logo_url: str | None = None
 
 class CustomerOut(CustomerBase):
     id: int

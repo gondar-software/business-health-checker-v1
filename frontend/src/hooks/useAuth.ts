@@ -9,7 +9,11 @@ async function fetchUser() {
     useToken: true
   });
   if (response.status === 200) {
-    return await response.json();
+    const userData = await response.json();
+    return {
+      ...userData,
+      user_idx: -1
+    }
   }
   else return null;
 }
@@ -29,11 +33,21 @@ export const useAuth = () => {
     queryClient.setQueryData([AUTH_KEY, 'user'], null);
   };
 
+  const changeUserIdx = (userIdx: number) => {
+    if (user) {
+      queryClient.setQueryData([AUTH_KEY, 'user'], {
+        ...user,
+        user_idx: userIdx
+      });
+    }
+  };
+
   return {
     user,
     isLoading,
     isAuthenticated: !!user,
     error,
+    changeUserIdx,
     logout,
   };
 }
