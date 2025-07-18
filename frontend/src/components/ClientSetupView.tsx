@@ -8,39 +8,38 @@ import { businessAreas } from "@/constants/questions";
 import { sectorConfig } from "@/constants/sectorConfigs";
 import { industryConfig } from "@/constants/industryConfigs";
 import { ClientSetupViewParams } from "@/types/params";
-import { clientInfoSchema } from "@/types/schemas";
-import { useInfo } from "@/hooks/useInfo";
+import { customerSchema } from "@/types/schemas";
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from "@/hooks/useAuth";
+import { apiRequest } from '@/lib/queryClient';
 
 const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setSelectedAreas, selectedAreas }) => {
     const [selectedSector, setSelectedSector] = useState<string>('private');
     const [selectedIndustry, setSelectedIndustry] = useState<string>('manufacturing');
-    const { info, createOrUpdateInfo } = useInfo();
     const { toast } = useToast();
+    const { user } = useAuth();
 
     useEffect(() => {
-        if (info) {
+        if (user?.customer) {
             const sectorKey = Object.keys(sectorConfig).find(
-                key => sectorConfig[key].name === info.sector
+                key => sectorConfig[key].name === user.customer!.sector
             );
             const industryKey = Object.keys(industryConfig).find(
-                key => industryConfig[key].name === info.industry
+                key => industryConfig[key].name === user.customer!.industry
             );
-    
+
             if (sectorKey) setSelectedSector(sectorKey);
             if (industryKey) setSelectedIndustry(industryKey);
-    
-            clientInfoForm.reset({
-                ...info,
-                sector: info.sector,
-                industry: info.industry,
+
+            customerForm.reset({
+                ...user.customer
             });
         }
-    }, [info]);
+    }, [user]);
 
-    const clientInfoForm = useForm({
-        resolver: zodResolver(clientInfoSchema),
-        defaultValues: info || {
+    const customerForm = useForm({
+        resolver: zodResolver(customerSchema),
+        defaultValues: user?.customer || {
             name: 'ABC Corporation Ltd',
             sector: sectorConfig[selectedSector].name,
             industry: industryConfig[selectedIndustry].name,
@@ -48,7 +47,7 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
             turnover: '£1M - £5M',
         },
     });
-    const { register, watch, setValue, handleSubmit } = clientInfoForm;
+    const { register, watch, setValue, handleSubmit } = customerForm;
 
     // Watch these for live updates and default values
     const watchName = watch('name');
@@ -88,15 +87,20 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                 break;
         }
     };
-    
+
     const saveClientMutation = useMutation({
         mutationFn: async (data: any) => {
-            await createOrUpdateInfo({
-                name: data.name,
-                sector: data.sector,
-                industry: data.industry,
-                size: data.size,
-                turnover: data.turnover,
+            console.log(data)
+            await apiRequest("POST", "/api/customers/", {
+                data: {
+                    name: data.name,
+                    sector: data.sector,
+                    industry: data.industry,
+                    size: data.size,
+                    turnover: data.turnover,
+                    logo_url: data.logo_url || null,
+                },
+                useToken: true,
             });
         },
         onSuccess: () => {
@@ -118,56 +122,132 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
         saveClientMutation.mutate(data);
     };
 
+    const logoUploadMutation = useMutation({
+        mutationFn: async (file: File) => {
+            const formData = new FormData();
+            formData.append('image', file);
+
+            const response = await fetch(
+                `https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_IMGBB_API}`,
+                {
+                    method: 'POST',
+                    body: formData
+                }
+            );
+            const urlData = await response.json();
+            return urlData.data.url;
+        },
+        onSuccess: (url) => {
+            setValue('logo_url', url);
+        },
+        onError: () => {
+            toast({
+                title: "Error",
+                description: "Failed to upload logo.",
+                variant: "destructive",
+            });
+        }
+    });
+
+    const onLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        logoUploadMutation.mutate(event.target.files![0]);
+    }
+
     return (
         <div className="max-w-6xl mx-auto p-6">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-3xl font-bold text-gray-800">Client Assessment Setup</h2>
             </div>
 
-            <form onSubmit={handleSubmit(onSaveClientInfo)}>
+            <form aria-disabled={!!user?.user_idx && user.user_idx > -1} onSubmit={handleSubmit(onSaveClientInfo)}>
                 {/* Client Information */}
                 <div className="bg-white rounded-lg shadow-md p-6 mb-6">
                     <h3 className="text-xl font-semibold text-gray-800 mb-4">Client Information</h3>
-                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-4'>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Client Name</label>
-                            <input
-                                {...register('name', { required: true })}
-                                type="text"
-                                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                placeholder="Enter client organization name"
-                                defaultValue={watchName}
-                            />
+                    <div className="flex flex-col md:flex-row gap-6 mb-4">
+                        {/* Left: Logo Avatar Uploader */}
+                        <div className="flex flex-col items-center justify-center w-full md:w-[200px]">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Company Logo</label>
+                            <label
+                                htmlFor="logo-upload"
+                                className="cursor-pointer relative rounded-full w-32 h-32 overflow-hidden border-2 border-dashed border-gray-300 hover:border-blue-500 transition"
+                            >
+                                {customerForm.watch("logo_url") ? (
+                                    <img
+                                        src={customerForm.watch("logo_url")}
+                                        alt="Company Logo"
+                                        className="object-cover w-full h-full"
+                                    />
+                                ) : (
+                                    <div className="flex items-center justify-center w-full h-full text-sm text-gray-500">
+                                        {logoUploadMutation.isPending ? (
+                                            <span>Uploading...</span>
+                                        ) : (
+                                            <span>{(!!user?.user_idx && user.user_idx > -1) ? "None" : "Upload"}</span>
+                                        )}
+                                    </div>
+                                )}
+                                <input
+                                    id="logo-upload"
+                                    type="file"
+                                    disabled={(!!user?.user_idx && user.user_idx > -1) || logoUploadMutation.isPending}
+                                    accept="image/*"
+                                    onChange={onLogoUpload}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                />
+                            </label>
+                            {customerForm.watch("logo_url") && (
+                                <button
+                                    type="button"
+                                    className="mt-2 text-xs text-red-600 hover:underline"
+                                    onClick={() => setValue("logo_url", "")}
+                                >
+                                    Remove Logo
+                                </button>
+                            )}
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Organization Size</label>
-                            <select
-                                {...register('size', { required: true })}
-                                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                defaultValue={watchSize}
-                            >
-                                <option value="Small (1-50 employees)">Small (1-50 employees)</option>
-                                <option value="Medium (50-250 employees)">Medium (50-250 employees)</option>
-                                <option value="Large (250-1000 employees)">Large (250-1000 employees)</option>
-                                <option value="Enterprise (1000+ employees)">Enterprise (1000+ employees)</option>
-                            </select>
-                        </div>
+                        {/* Right: Form Inputs */}
+                        <div className="flex-1 grid gap-6">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Client Name</label>
+                                <input
+                                    {...register('name', { required: true })}
+                                    type="text"
+                                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Enter client organization name"
+                                    defaultValue={watchName}
+                                />
+                            </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Organization Turnover</label>
-                            <select
-                                {...register('turnover', { required: true })}
-                                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                defaultValue={watchTurnover}
-                            >
-                                <option value="Under £1M">Under £1M</option>
-                                <option value="£1M - £5M">£1M - £5M</option>
-                                <option value="£5M - £25M">£5M - £25M</option>
-                                <option value="£25M - £100M">£25M - £100M</option>
-                                <option value="£100M - £500M">£100M - £500M</option>
-                                <option value="Over £500M">Over £500M</option>
-                            </select>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Organization Size</label>
+                                <select
+                                    {...register('size', { required: true })}
+                                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    defaultValue={watchSize}
+                                >
+                                    <option value="Small (1-50 employees)">Small (1-50 employees)</option>
+                                    <option value="Medium (50-250 employees)">Medium (50-250 employees)</option>
+                                    <option value="Large (250-1000 employees)">Large (250-1000 employees)</option>
+                                    <option value="Enterprise (1000+ employees)">Enterprise (1000+ employees)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Organization Turnover</label>
+                                <select
+                                    {...register('turnover', { required: true })}
+                                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    defaultValue={watchTurnover}
+                                >
+                                    <option value="Under £1M">Under £1M</option>
+                                    <option value="£1M - £5M">£1M - £5M</option>
+                                    <option value="£5M - £25M">£5M - £25M</option>
+                                    <option value="£25M - £100M">£25M - £100M</option>
+                                    <option value="£100M - £500M">£100M - £500M</option>
+                                    <option value="Over £500M">Over £500M</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -237,11 +317,11 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                     </div>
                 </div>
 
-                <div className="flex flex-col justify-end w-full items-end mb-6">
+                {(!user?.user_idx || user?.user_idx == -1) && <div className="flex flex-col justify-end w-full items-end mb-6">
                     <Button type="submit" className="w-1/4">
                         Save
                     </Button>
-                </div>
+                </div>}
             </form>
 
             {/* Business Areas Selection */}
@@ -356,11 +436,11 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                     <div>
                         <h4 className="font-medium text-blue-800 mb-2">Client Details:</h4>
                         <ul className="text-blue-700 space-y-1">
-                            <li>• <strong>Client:</strong> {clientInfoForm.getValues().name}</li>
-                            <li>• <strong>Sector:</strong> {clientInfoForm.getValues().sector}</li>
-                            <li>• <strong>Industry:</strong> {clientInfoForm.getValues().industry}</li>
-                            <li>• <strong>Size:</strong> {clientInfoForm.getValues().size}</li>
-                            <li>• <strong>Turnover:</strong> {clientInfoForm.getValues().turnover}</li>
+                            <li>• <strong>Client:</strong> {customerForm.getValues().name}</li>
+                            <li>• <strong>Sector:</strong> {customerForm.getValues().sector}</li>
+                            <li>• <strong>Industry:</strong> {customerForm.getValues().industry}</li>
+                            <li>• <strong>Size:</strong> {customerForm.getValues().size}</li>
+                            <li>• <strong>Turnover:</strong> {customerForm.getValues().turnover}</li>
                         </ul>
                     </div>
                     <div>
