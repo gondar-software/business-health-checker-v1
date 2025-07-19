@@ -108,6 +108,7 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                 title: "Success",
                 description: "Client information saved successfully."
             });
+            window.location.reload();
         },
         onError: () => {
             toast({
@@ -318,8 +319,8 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                 </div>
 
                 {(!user?.user_idx || user?.user_idx == -1) && <div className="flex flex-col justify-end w-full items-end mb-6">
-                    <Button type="submit" className="w-1/4">
-                        Save
+                    <Button type="submit" disabled={saveClientMutation.isPending} className="w-1/4">
+                        {saveClientMutation.isPending ? "Saving" : "Save"}
                     </Button>
                 </div>}
             </form>
