@@ -1,4 +1,5 @@
 from fastapi import HTTPException
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.db.repositories import (
     AssessorRepository,
@@ -48,12 +49,13 @@ class AssessorService:
 
         encrypted_param = encrypt_invitation_param(assessor_info.email, customer.id)
         invitation_url = f"{settings.PROJECT_URL}/assessors/accept-invite?param={encrypted_param}"
-        send_assessor_invitation_email(
+        await run_in_threadpool(
+            send_assessor_invitation_email,
             assessor_info.email,
             invitation_url,
             CustomerBase.model_validate(customer).dict()
         )
-        
+
         new_assessor = Assessor(
             email=assessor_info.email,
             customer_id=customer.id
