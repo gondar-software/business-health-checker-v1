@@ -5,6 +5,7 @@ class AssessorBase(BaseModel):
     role: str
 
 class AssessorOut(AssessorBase):
+    email: str
     id: int
 
     model_config = { "from_attributes": True }

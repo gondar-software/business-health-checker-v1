@@ -28,3 +28,8 @@ class UserRepository:
         await self.db.commit()
         await self.db.refresh(user)
         return user
+
+    async def get_users_by_ids(self, user_ids: list[int]) -> list[User]:
+        stmt = select(User).where(User.id.in_(user_ids))
+        result = await self.db.execute(stmt)
+        return result.scalars().all()

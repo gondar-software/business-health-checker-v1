@@ -10,3 +10,8 @@ class AssessorRepository:
         stmt = select(Assessor).where(Assessor.user_id == user_id)
         result = await self.db.execute(stmt)
         return result.scalars().all()
+
+    async def get_assessors_by_customer_id(self, customer_id: int) -> list[Assessor]:
+        stmt = select(Assessor).where(Assessor.customer_id == customer_id)
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
