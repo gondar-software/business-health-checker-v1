@@ -21,8 +21,13 @@ export default function Header() {
                             </span>
                         </Link>
                         {(user && (!user.user_idx || user.user_idx === -1)) && user.customer && (
-                            <Link href="/invite" className="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">
-                                Invite Assessor
+                            <Link href="/assessors" className="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">
+                                Manage Assessors
+                            </Link>
+                        )}
+                        {isAuthenticated && (
+                            <Link href="/accounts" className="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">
+                                My Accounts
                             </Link>
                         )}
                     </div>

@@ -5,6 +5,7 @@ import Register from '@/pages/Register';
 import RePwd from '@/pages/RePwd';
 import NotFound from "@/pages/not-found";
 import Header from "./components/Header";
+import Assessors from "@/pages/Assessors";
 import { useAuth } from "@/hooks/useAuth";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -27,6 +28,7 @@ function Router() {
             <Redirect to="/login" />
           )}
         </Route>
+        {isAuthenticated && <Route path="/assessors" component={Assessors} />}
         <Route component={NotFound} />
       </Switch>
     </>
