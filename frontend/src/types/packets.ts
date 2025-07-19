@@ -11,8 +11,6 @@ export interface Customer {
 
 export interface Assessor {
   id: number;
-  user_id: number;
-  customer_id: number;
   name: string;
   role: string;
 }
