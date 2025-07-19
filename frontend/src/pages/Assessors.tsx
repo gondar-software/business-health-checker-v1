@@ -40,6 +40,20 @@ export default function Assessors() {
         },
     });
 
+    const deleteAssessorMutation = useMutation({
+        mutationFn: async (assessorId: number) => {
+            await apiRequest("DELETE", `/api/assessors/${assessorId}`, {
+                useToken: true
+            });
+        },
+        onSuccess: () => {
+            toast({
+                title: "Success",
+                description: "Assessor deleted successfully."
+            });
+        },
+    });
+
     return (
         <div className="pt-16 min-h-screen">
             <section className="py-8">
@@ -99,8 +113,8 @@ export default function Assessors() {
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
-                                                    // onClick={() => deleteProjectMutation.mutate(project.id)}
-                                                    // disabled={deleteProjectMutation.isPending}
+                                                    onClick={() => deleteAssessorMutation.mutate(assessor.id)}
+                                                    disabled={deleteAssessorMutation.isPending}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
