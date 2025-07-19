@@ -44,6 +44,7 @@ class VerificationCache:
         if is_valid:
             self.code_cache.pop(user_email, None)
             self._clear_rate_limits(user_email)
+            self.clear_expired_entries()
         
         return is_valid, False
 

@@ -18,5 +18,6 @@ __all__ = [
     "AssessmentOut",
     "AssessorBase",
     "AssessorOut",
+    "AssessorCreate",
     "oauth2_scheme",
 ]

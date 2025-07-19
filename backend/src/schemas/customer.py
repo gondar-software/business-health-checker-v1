@@ -7,6 +7,8 @@ class CustomerBase(BaseModel):
     industry: str
     turnover: str
     logo_url: str | None = None
+    
+    model_config = { "from_attributes": True }
 
 class CustomerOut(CustomerBase):
     id: int

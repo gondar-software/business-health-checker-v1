@@ -4,7 +4,7 @@ from src.dependencies import (
     get_current_user,
     get_assessor_service
 )
-from src.schemas import UserInfo, AssessorOut
+from src.schemas import UserInfo, AssessorOut, AssessorCreate
 
 assessors_router = APIRouter()
 
@@ -22,3 +22,19 @@ async def get_assessors(
             status_code=500,
             detail=f"An unexpected error occurred: {str(e)}"
         )
+
+@assessors_router.post("/invite")
+async def send_invitation(
+    assessor_info: AssessorCreate,
+    user: UserInfo = Depends(get_current_user),
+    service: AssessorService = Depends(get_assessor_service)
+):
+    try:
+        await service.send_invitation(assessor_info, user.id)
+    except HTTPException:
+        raise
+    # except Exception as e:
+    #     raise HTTPException(
+    #         status_code=500,
+    #         detail=f"An unexpected error occurred: {str(e)}"
+    #     )

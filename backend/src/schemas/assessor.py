@@ -1,11 +1,14 @@
 from pydantic import BaseModel
 
 class AssessorBase(BaseModel):
-    name: str
-    role: str
+    name: str | None
+    role: str | None
 
 class AssessorOut(AssessorBase):
     email: str
     id: int
 
     model_config = { "from_attributes": True }
+
+class AssessorCreate(BaseModel):
+    email: str

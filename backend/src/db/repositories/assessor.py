@@ -15,3 +15,18 @@ class AssessorRepository:
         stmt = select(Assessor).where(Assessor.customer_id == customer_id)
         result = await self.db.execute(stmt)
         return result.scalars().all()
+
+    async def get_assessor_by_email_and_customer_id(self, email: str, customer_id: int) -> Assessor:
+        stmt = select(Assessor).where(Assessor.email == email, Assessor.customer_id == customer_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def create_assessor(self, assessor: Assessor) -> Assessor:
+        try:
+            self.db.add(assessor)
+            await self.db.commit()
+            await self.db.refresh(assessor)
+            return assessor
+        except Exception as e:
+            await self.db.rollback()
+            raise e
