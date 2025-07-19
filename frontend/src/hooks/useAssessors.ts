@@ -14,11 +14,11 @@ async function fetchAssessors() {
       ...assessorsData,
     }
   }
-  else return null;
+  else return [];
 }
 
 export const useAssessors = () => {
-  const { data: assessors, isLoading, error } = useQuery<Assessor[]>({
+  const { data: assessors = {}, isLoading, error } = useQuery<Assessor[]>({
     queryKey: [AUTH_KEY, 'assessors'],
     queryFn: fetchAssessors,
     retry: false,
@@ -26,7 +26,7 @@ export const useAssessors = () => {
   });
 
   return {
-    assessors,
+    assessors: Object.values<Assessor>(assessors),
     isLoading,
     error
   };

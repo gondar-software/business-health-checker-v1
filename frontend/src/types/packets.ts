@@ -11,9 +11,10 @@ export interface Customer {
 
 export interface Assessor {
   id: number;
-  name: string;
-  role: string;
+  name?: string;
+  role?: string;
   email: string;
+  pending: boolean;
 }
 
 export interface User {

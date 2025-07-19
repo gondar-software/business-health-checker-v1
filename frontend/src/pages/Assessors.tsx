@@ -60,7 +60,7 @@ export default function Assessors() {
                                     <div>
                                         <p className="text-gray-600 dark:text-gray-400 text-sm">Assessors</p>
                                         <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                                            {assessors?.length || "0"}
+                                            {assessors.length || "0"}
                                         </p>
                                     </div>
                                     <Users className="h-8 w-8 text-primary-600 dark:text-primary-400" />
@@ -78,7 +78,7 @@ export default function Assessors() {
                                 </Button>
                             </div>
 
-                            {assessors && assessors.length > 0 ? (
+                            {assessors.length > 0 ? (
                                 <div className="space-y-4">
                                     {assessors.map((assessor) => (
                                         <div key={assessor.id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
@@ -88,11 +88,11 @@ export default function Assessors() {
                                                 </div>
                                                 <div>
                                                     <h3 className="font-medium text-gray-900 dark:text-white">
-                                                        {assessor.name}
+                                                        {assessor.pending ? `${assessor.email}` : `${assessor.name} (${assessor.email})`}
                                                     </h3>
-                                                    <div className="flex items-center space-x-2 mt-1">
-                                                        <Badge variant="outline">{assessor.role}</Badge>
-                                                    </div>
+                                                    {assessor.pending && <div className="flex items-center space-x-2 mt-1">
+                                                        <Badge variant="outline">PENDING</Badge>
+                                                    </div>}
                                                 </div>
                                             </div>
                                             <div className="flex items-center space-x-2">

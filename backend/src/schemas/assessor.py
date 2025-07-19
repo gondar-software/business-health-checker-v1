@@ -7,6 +7,7 @@ class AssessorBase(BaseModel):
 class AssessorOut(AssessorBase):
     email: str
     id: int
+    pending: bool
 
     model_config = { "from_attributes": True }
 
