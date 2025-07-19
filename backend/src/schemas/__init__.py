@@ -19,5 +19,7 @@ __all__ = [
     "AssessorBase",
     "AssessorOut",
     "AssessorCreate",
+    "AssessorInvitationCheck",
+    "AssessorRegister",
     "oauth2_scheme",
 ]
