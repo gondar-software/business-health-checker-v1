@@ -16,7 +16,7 @@ export default function AcceptInvite() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
-  if (isAuthenticated) {
+  if (!isAuthenticated) {
     localStorage.setItem('redirectionUrl', window.location.href);
     navigate("/");
   }
