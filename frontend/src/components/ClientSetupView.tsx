@@ -17,7 +17,7 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
     const [selectedSector, setSelectedSector] = useState<string>('private');
     const [selectedIndustry, setSelectedIndustry] = useState<string>('manufacturing');
     const { toast } = useToast();
-    const { user } = useAuth();
+    const { user, refresh } = useAuth();
 
     useEffect(() => {
         if (user?.customer) {
@@ -90,7 +90,6 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
 
     const saveClientMutation = useMutation({
         mutationFn: async (data: any) => {
-            console.log(data)
             await apiRequest("POST", "/api/customers/", {
                 data: {
                     name: data.name,
@@ -108,7 +107,7 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                 title: "Success",
                 description: "Client information saved successfully."
             });
-            window.location.reload();
+            refresh();
         },
         onError: () => {
             toast({

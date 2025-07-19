@@ -33,6 +33,10 @@ export const useAuth = () => {
     queryClient.setQueryData([AUTH_KEY, 'user'], null);
   };
 
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: [AUTH_KEY, 'user'] });
+  };
+
   const changeUserIdx = (userIdx: number) => {
     if (user) {
       queryClient.setQueryData([AUTH_KEY, 'user'], {
@@ -49,5 +53,6 @@ export const useAuth = () => {
     error,
     changeUserIdx,
     logout,
+    refresh
   };
 }

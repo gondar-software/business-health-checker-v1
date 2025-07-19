@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Assessor } from "@/types/packets";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -18,6 +18,8 @@ async function fetchAssessors() {
 }
 
 export const useAssessors = () => {
+  const queryClient = useQueryClient();
+
   const { data: assessors = {}, isLoading, error } = useQuery<Assessor[]>({
     queryKey: [AUTH_KEY, 'assessors'],
     queryFn: fetchAssessors,
@@ -25,9 +27,14 @@ export const useAssessors = () => {
     staleTime: 1000 * 60 * 5
   });
 
+  const refresh = () => {
+    queryClient.invalidateQueries({ queryKey: [AUTH_KEY, 'assessors'] });
+  }
+
   return {
     assessors: Object.values<Assessor>(assessors),
     isLoading,
-    error
+    error,
+    refresh
   };
 }

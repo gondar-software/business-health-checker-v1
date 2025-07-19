@@ -11,7 +11,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Assessors() {
-    const { assessors } = useAssessors();
+    const { assessors, refresh } = useAssessors();
     const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
     const [email, setEmail] = useState("");
     const { toast } = useToast();
@@ -29,6 +29,7 @@ export default function Assessors() {
             });
         },
         onSuccess: () => {
+            refresh();
             onClose();
         },
         onError: (_) => {
@@ -47,6 +48,7 @@ export default function Assessors() {
             });
         },
         onSuccess: () => {
+            refresh();
             toast({
                 title: "Success",
                 description: "Assessor deleted successfully."
