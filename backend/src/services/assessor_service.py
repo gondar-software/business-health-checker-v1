@@ -30,6 +30,12 @@ class AssessorService:
         return [AssessorOut.model_validate(assessor) for assessor in assessors]
 
     async def send_invitation(self, assessor_info: AssessorCreate, user_id: int):
+        me = await self.user_repository.get_user_by_id(user_id)
+        if not me:
+            raise HTTPException(status_code=404, detail="User not found")
+        elif me.email == assessor_info.email:
+            raise HTTPException(status_code=400, detail="You cannot invite yourself as an assessor")
+
         customer = await self.customer_repository.get_customer_by_user_id(user_id)
         if not customer:
             raise HTTPException(status_code=404, detail="Customer not found")
