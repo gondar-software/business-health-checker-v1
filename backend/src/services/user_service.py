@@ -62,8 +62,11 @@ class UserService:
     async def get_token_by_google(self, email: str) -> Token:
         existing_user = await self.user_repository.get_by_email(email)
         if not existing_user:
-            user_create = UserCreate(email=email, password="password")
+            user_create = UserCreate(email=email, password="")
             existing_user = await self.create_user(user_create)
+        else:
+            if verify_password("", existing_user.hashed_password):
+                raise HTTPException(status_code=401, detail="Password is incorrect")
 
         return create_access_token(UserInfo.model_validate(existing_user).dict())
 
