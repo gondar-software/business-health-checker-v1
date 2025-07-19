@@ -1,11 +1,44 @@
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Plus, Users, User } from "lucide-react";
-import { Assessor } from "@/types/packets";
+import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { useAssessors } from "@/hooks/useAssessors";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Assessors() {
-    const assessors: Assessor[] = [];
+    const { assessors } = useAssessors();
+    const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+    const [email, setEmail] = useState("");
+    const { toast } = useToast();
+
+    const onClose = () => {
+        setInviteDialogOpen(false);
+        setEmail("");
+    }
+
+    const inviteMutation = useMutation({
+        mutationFn: async (email: string) => {
+            await apiRequest("POST", "/api/assessors/invite", {
+                data: { email },
+                useToken: true
+            });
+        },
+        onSuccess: () => {
+            onClose();
+        },
+        onError: (_) => {
+            toast({
+                title: "Error",
+                description: "Failed to invite assessor.",
+                variant: "destructive",
+            });
+        },
+    });
 
     return (
         <div className="pt-16 min-h-screen">
@@ -27,7 +60,7 @@ export default function Assessors() {
                                     <div>
                                         <p className="text-gray-600 dark:text-gray-400 text-sm">Assessors</p>
                                         <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                                            3
+                                            {assessors?.length || "0"}
                                         </p>
                                     </div>
                                     <Users className="h-8 w-8 text-primary-600 dark:text-primary-400" />
@@ -39,13 +72,13 @@ export default function Assessors() {
                     <Card>
                         <CardContent className="p-6">
                             <div className="flex justify-between items-center">
-                                <Button>
+                                <Button onClick={() => setInviteDialogOpen(true)} className="mb-4">
                                     <Plus className="mr-2 h-4 w-4" />
                                     Invite Assessor
                                 </Button>
                             </div>
 
-                            {assessors.length > 0 ? (
+                            {assessors && assessors.length > 0 ? (
                                 <div className="space-y-4">
                                     {assessors.map((assessor) => (
                                         <div key={assessor.id} className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
@@ -85,6 +118,37 @@ export default function Assessors() {
                     </Card>
                 </div>
             </section>
+
+            <Dialog open={inviteDialogOpen}>
+                <DialogContent onClose={onClose}>
+                    <DialogTitle>Invite Assessor</DialogTitle>
+                    <DialogDescription>
+                        Enter the email address of the assessor you want to invite.
+                    </DialogDescription>
+                    <Input
+                        placeholder="email"
+                        type="email"
+                        className="mt-4"
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={onClose}
+                            className="mr-2"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                inviteMutation.mutate(email);
+                            }}
+                        >
+                            {inviteMutation.isPending ? "Inviting..." : "Invite"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
