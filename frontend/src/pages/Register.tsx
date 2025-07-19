@@ -17,7 +17,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Register() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, refresh } = useAuth();
   const { toast } = useToast();
   const [state, setSignUpState] = useState<SignUpState>("email");
   const [code, setCode] = useState<string>("");
@@ -25,8 +25,10 @@ export default function Register() {
   const [, navigate] = useLocation();
 
   useEffect(() => {
-    if (isAuthenticated)
-      navigate("/");
+    if (isAuthenticated) {
+      navigate(localStorage.getItem('redirectionUrl') || "/");
+      localStorage.removeItem('redirectionUrl');
+    }
   }, [isAuthenticated]);
 
   useEffect(() => {
@@ -49,7 +51,8 @@ export default function Register() {
         localStorage.setItem('jwtToken', responseData.token);
         setGoogleSignup(false);
         form.reset();
-        window.location.href = "/";
+        
+        refresh();
       }
       catch (_) {
         toast({
@@ -122,7 +125,8 @@ export default function Register() {
 
       const responseData = await response.json()
       localStorage.setItem('jwtToken', responseData.token);
-      window.location.href = "/";
+      
+      refresh();
     },
     onSuccess: () => {
       setSignUpState("email");
