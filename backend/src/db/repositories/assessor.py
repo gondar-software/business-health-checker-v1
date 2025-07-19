@@ -30,3 +30,16 @@ class AssessorRepository:
         except Exception as e:
             await self.db.rollback()
             raise e
+
+    async def get_assessor_by_id(self, assessor_id: int) -> Assessor:
+        stmt = select(Assessor).where(Assessor.id == assessor_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def delete_assessor(self, assessor: Assessor):
+        try:
+            await self.db.delete(assessor)
+            await self.db.commit()
+        except Exception as e:
+            await self.db.rollback()
+            raise e

@@ -55,3 +55,10 @@ class AssessorService:
         assessor = await self.assessor_repository.create_assessor(new_assessor)
         if not assessor:
             raise HTTPException(status_code=400, detail="Failed to create assessor")
+
+    async def delete_assessor(self, assessor_id: int):
+        assessor = await self.assessor_repository.get_assessor_by_id(assessor_id)
+        if not assessor:
+            raise HTTPException(status_code=404, detail="Assessor not found")
+
+        await self.assessor_repository.delete_assessor(assessor)

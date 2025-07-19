@@ -38,3 +38,19 @@ async def send_invitation(
             status_code=500,
             detail=f"An unexpected error occurred: {str(e)}"
         )
+
+@assessors_router.delete("/{assessor_id}")
+async def delete_assessor(
+    assessor_id: int,
+    _: UserInfo = Depends(get_current_user),
+    service: AssessorService = Depends(get_assessor_service)
+):
+    try:
+        await service.delete_assessor(assessor_id)
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"An unexpected error occurred: {str(e)}"
+        )
