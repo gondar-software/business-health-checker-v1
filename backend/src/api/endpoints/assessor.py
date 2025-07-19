@@ -33,8 +33,8 @@ async def send_invitation(
         await service.send_invitation(assessor_info, user.id)
     except HTTPException:
         raise
-    # except Exception as e:
-    #     raise HTTPException(
-    #         status_code=500,
-    #         detail=f"An unexpected error occurred: {str(e)}"
-    #     )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"An unexpected error occurred: {str(e)}"
+        )
