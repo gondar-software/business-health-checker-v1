@@ -48,7 +48,7 @@ class AssessorService:
             raise HTTPException(status_code=400, detail="Assessor with this email already exists")
 
         encrypted_param = encrypt_invitation_param(assessor_info.email, customer.id)
-        invitation_url = f"{settings.PROJECT_URL}/assessors/accept-invite?param={encrypted_param}"
+        invitation_url = f"{settings.PROJECT_URL}/accept-invite?param={encrypted_param}"
         await run_in_threadpool(
             send_assessor_invitation_email,
             assessor_info.email,
