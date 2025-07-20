@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation, Link } from "wouter";
+import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,12 +8,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { loginSchema } from "@/types/schema";
+import { assessorSchema } from "@/types/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function AcceptInvite() {
-    const { isAuthenticated } = useAuth();
+    const { isAuthenticated, refresh } = useAuth();
     const [, navigate] = useLocation();
     const { toast } = useToast();
 
@@ -46,27 +46,25 @@ export default function AcceptInvite() {
     }, [isAuthenticated]);
 
     const form = useForm({
-        resolver: zodResolver(loginSchema),
+        resolver: zodResolver(assessorSchema),
         defaultValues: {
-            email: "",
-            pwd: ""
+            name: "",
+            role: ""
         }
     });
 
-    const loginMutation = useMutation({
+    const saveAssessorInfoMutation = useMutation({
         mutationFn: async (data: typeof form.getValues) => {
-            const response = await apiRequest("POST", "/api/users/login", {
+            await apiRequest("POST", "/api/assessors", {
                 data: {
-                    email: (data as any).email,
-                    password: (data as any).pwd
+                    name: (data as any).name,
+                    role: (data as any).role
                 }
             });
-            const responseData = await response.json();
-            localStorage.setItem('jwtToken', responseData.token);
         },
         onSuccess: () => {
-            form.reset();
-            window.location.href = "/";
+            refresh();
+            navigate("/");
         },
         onError: (_) => {
             toast({
@@ -78,7 +76,7 @@ export default function AcceptInvite() {
     });
 
     const onSubmit = (data: any) => {
-        loginMutation.mutate(data);
+        saveAssessorInfoMutation.mutate(data);
     };
 
     return (
@@ -87,7 +85,7 @@ export default function AcceptInvite() {
                 <div className="max-w-xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
                         <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-                            Login
+                            Accept Invitation
                         </h1>
                     </div>
 
@@ -99,12 +97,12 @@ export default function AcceptInvite() {
                                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                                         <FormField
                                             control={form.control}
-                                            name="email"
+                                            name="name"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Email</FormLabel>
+                                                    <FormLabel>Name</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="your.email@example.com" type="email" {...field} />
+                                                        <Input placeholder="John Doe" type="text" {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -113,12 +111,12 @@ export default function AcceptInvite() {
 
                                         <FormField
                                             control={form.control}
-                                            name="pwd"
+                                            name="role"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Password</FormLabel>
+                                                    <FormLabel>Role</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="Enter password" type="password" {...field} />
+                                                        <Input placeholder="Software Engineer" type="text" {...field} />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -128,28 +126,11 @@ export default function AcceptInvite() {
                                         <Button
                                             type="submit"
                                             className="w-full"
-                                            disabled={loginMutation.isPending}
+                                            disabled={saveAssessorInfoMutation.isPending}
                                         >
-                                            {loginMutation.isPending ?
-                                                "Logging in..." : "Login"}
+                                            {saveAssessorInfoMutation.isPending ?
+                                                "Accepting..." : "Accept Invitation"}
                                         </Button>
-
-                                        {/* 🔗 Add Auth Links Below Buttons */}
-                                        <div className="flex justify-between text-sm text-blue-600 pt-4">
-                                            <Link
-                                                href="/register"
-                                                className="hover:underline"
-                                            >
-                                                Don't have an account? Register
-                                            </Link>
-
-                                            <Link
-                                                href="/re-pwd"
-                                                className="hover:underline"
-                                            >
-                                                Forgot Password?
-                                            </Link>
-                                        </div>
                                     </form>
                                 </Form>
                             </CardContent>

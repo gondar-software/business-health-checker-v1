@@ -7,7 +7,7 @@ from src.db.repositories import (
     UserRepository
 )
 from src.db.models import Assessor
-from src.schemas import AssessorOut, AssessorCreate, CustomerBase, UserInfo
+from src.schemas import AssessorOut, AssessorCreate, CustomerBase
 from src.core import encrypt_invitation_param, decrypt_invitation_param
 from src.smtp import send_assessor_invitation_email
 from src.config import settings
