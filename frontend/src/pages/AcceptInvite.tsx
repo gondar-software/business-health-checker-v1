@@ -16,6 +16,7 @@ export default function AcceptInvite() {
     const { isAuthenticated, refresh } = useAuth();
     const [, navigate] = useLocation();
     const { toast } = useToast();
+    const searchString = window.location.search;
 
     if (!isAuthenticated) {
         localStorage.setItem('redirectionUrl', window.location.href);
@@ -24,7 +25,6 @@ export default function AcceptInvite() {
 
     useEffect(() => {
         const redirectIfNotInvitationForMe = async () => {
-            const searchString = window.location.search;
             if (searchString === "") {
                 toast({
                     title: "Error",
@@ -55,7 +55,7 @@ export default function AcceptInvite() {
 
     const saveAssessorInfoMutation = useMutation({
         mutationFn: async (data: typeof form.getValues) => {
-            await apiRequest("POST", "/api/assessors", {
+            await apiRequest("POST", `/api/assessors/?${searchString.substring(1)}`, {
                 data: {
                     name: (data as any).name,
                     role: (data as any).role
@@ -74,6 +74,29 @@ export default function AcceptInvite() {
             });
         },
     });
+
+    const declineInvitationMutation = useMutation({
+        mutationFn: async () => {
+            await apiRequest("DELETE", `/api/assessors/?${searchString.substring(1)}`, {
+                useToken: true
+            });
+        },
+        onSuccess: () => {
+            refresh();
+            navigate("/");
+        },
+        onError: (_) => {
+            toast({
+                title: "Error",
+                description: "Failed to decline invitation.",
+                variant: "destructive",
+            });
+        },
+    });
+
+    const declineInvitation = () => {
+        declineInvitationMutation.mutate();
+    };
 
     const onSubmit = (data: any) => {
         saveAssessorInfoMutation.mutate(data);
@@ -123,14 +146,23 @@ export default function AcceptInvite() {
                                             )}
                                         />
 
-                                        <Button
-                                            type="submit"
-                                            className="w-full"
-                                            disabled={saveAssessorInfoMutation.isPending}
-                                        >
-                                            {saveAssessorInfoMutation.isPending ?
-                                                "Accepting..." : "Accept Invitation"}
-                                        </Button>
+                                        <div className="flex justify-between">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                className="w-full mr-2"
+                                                onClick={declineInvitation}
+                                            >
+                                                Decline Invitation
+                                            </Button>
+                                            <Button
+                                                type="submit"
+                                                className="w-full ml-2"
+                                                disabled={saveAssessorInfoMutation.isPending}
+                                            >
+                                                {saveAssessorInfoMutation.isPending ? "Accepting..." : "Accept Invitation"}
+                                            </Button>
+                                        </div>
                                     </form>
                                 </Form>
                             </CardContent>
