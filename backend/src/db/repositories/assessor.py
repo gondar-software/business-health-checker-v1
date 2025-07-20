@@ -43,3 +43,13 @@ class AssessorRepository:
         except Exception as e:
             await self.db.rollback()
             raise e
+
+    async def update_assessor(self, assessor: Assessor) -> Assessor:
+        try:
+            self.db.add(assessor)
+            await self.db.commit()
+            await self.db.refresh(assessor)
+            return assessor
+        except Exception as e:  
+            await self.db.rollback()
+            raise e
