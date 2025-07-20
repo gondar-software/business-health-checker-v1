@@ -8,7 +8,7 @@ import { businessAreas } from "@/constants/questions";
 import { sectorConfig } from "@/constants/sectorConfigs";
 import { industryConfig } from "@/constants/industryConfigs";
 import { ClientSetupViewParams } from "@/types/params";
-import { customerSchema } from "@/types/schemas";
+import { customerSchema } from "@/types/schema";
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from '@/lib/queryClient';

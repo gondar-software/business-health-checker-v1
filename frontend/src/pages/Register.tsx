@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { FcGoogle } from "react-icons/fc";
-import { signUpSchema } from "@/shared/schema";
+import { signUpSchema } from "@/types/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { SignUpState } from "@/types/enums";
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";

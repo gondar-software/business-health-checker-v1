@@ -7,7 +7,7 @@ from src.db.repositories import (
     UserRepository
 )
 from src.db.models import Assessor
-from src.schemas import AssessorOut, AssessorCreate, CustomerBase
+from src.schemas import AssessorOut, AssessorCreate, CustomerBase, UserInfo
 from src.core import encrypt_invitation_param, decrypt_invitation_param
 from src.smtp import send_assessor_invitation_email
 from src.config import settings
@@ -70,3 +70,20 @@ class AssessorService:
             raise HTTPException(status_code=404, detail="Assessor not found")
 
         await self.assessor_repository.delete_assessor(assessor)
+
+    async def check_invitation(self, email: str, param: str):
+        try:
+            decrypted_email, customer_id = decrypt_invitation_param(param)
+        except Exception as _:
+            raise HTTPException(status_code=400, detail="Invalid invitation parameter")
+
+        if email != decrypted_email:
+            raise HTTPException(status_code=400, detail="Email does not match invitation")
+
+        customer = await self.customer_repository.get_customer_by_id(customer_id)
+        if not customer:
+            raise HTTPException(status_code=404, detail="Customer not found")
+
+        existing_assessor = await self.assessor_repository.get_assessor_by_email_and_customer_id(email, customer.id)
+        if not existing_assessor.pending:
+            raise HTTPException(status_code=400, detail="Assessor already accepted this invitation")

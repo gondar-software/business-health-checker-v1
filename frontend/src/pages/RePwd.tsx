@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { RePwdState } from "@/types/enums"
-import { rePwdSchema1, rePwdSchema2 } from "@/shared/schema";
+import { rePwdSchema1, rePwdSchema2 } from "@/types/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";

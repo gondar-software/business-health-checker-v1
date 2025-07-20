@@ -14,8 +14,5 @@ class AssessorOut(AssessorBase):
 class AssessorCreate(BaseModel):
     email: str
 
-class AssessorInvitationCheck(BaseModel):
-    param: str
-
 class AssessorRegister(AssessorBase):
     param: str

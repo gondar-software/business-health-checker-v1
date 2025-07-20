@@ -11,6 +11,11 @@ class CustomerRepository:
         result = await self.db.execute(stmt)
         return result.scalar_one_or_none()
 
+    async def get_customer_by_id(self, customer_id: int) -> Customer | None:
+        stmt = select(Customer).where(Customer.id == customer_id)
+        result = await self.db.execute(stmt)
+        return result.scalar_one_or_none()
+
     async def create_customer(self, customer: Customer) -> Customer:
         try:
             self.db.add(customer)

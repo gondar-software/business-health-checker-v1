@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useLocation, Link } from "wouter";
 import { useForm } from "react-hook-form";
 import { useMutation } from "@tanstack/react-query";
@@ -7,132 +8,155 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { loginSchema } from "@/shared/schema";
+import { loginSchema } from "@/types/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function AcceptInvite() {
-  const { isAuthenticated } = useAuth();
-  const [, navigate] = useLocation();
-  const { toast } = useToast();
+    const { isAuthenticated } = useAuth();
+    const [, navigate] = useLocation();
+    const { toast } = useToast();
 
-  if (!isAuthenticated) {
-    localStorage.setItem('redirectionUrl', window.location.href);
-    navigate("/");
-  }
-  
-  const form = useForm({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      pwd: ""
+    if (!isAuthenticated) {
+        localStorage.setItem('redirectionUrl', window.location.href);
+        navigate("/");
     }
-  });
 
-  const loginMutation = useMutation({
-    mutationFn: async (data: typeof form.getValues) => {
-      const response = await apiRequest("POST", "/api/users/login", {
-        data: {
-          email: (data as any).email,
-          password: (data as any).pwd
+    useEffect(() => {
+        const redirectIfNotInvitationForMe = async () => {
+            const searchString = window.location.search;
+            if (searchString === "") {
+                toast({
+                    title: "Error",
+                    description: "No invitation parameter found.",
+                    variant: "destructive",
+                });
+                navigate("/");
+                return;
+            }
+            try {
+                await apiRequest("GET", `/api/assessors/check?${searchString.substring(1)}`, {
+                    useToken: true
+                });
+            } catch (error) {
+                navigate("/");
+            }
         }
-      });
-      const responseData = await response.json();
-      localStorage.setItem('jwtToken', responseData.token);
-    },
-    onSuccess: () => {
-      form.reset();
-      window.location.href = "/";
-    },
-    onError: (_) => {
-      toast({
-        title: "Error",
-        description: "Failed to login. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
+        if (isAuthenticated) redirectIfNotInvitationForMe();
+    }, [isAuthenticated]);
 
-  const onSubmit = (data: any) => {
-    loginMutation.mutate(data);
-  };
+    const form = useForm({
+        resolver: zodResolver(loginSchema),
+        defaultValues: {
+            email: "",
+            pwd: ""
+        }
+    });
 
-  return (
-    <div className="pt-16 min-h-screen">
-      <section className="py-20">
-        <div className="max-w-xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-              Login
-            </h1>
-          </div>
-          
-          <div className="gap-12 max-w-xl">
-            {/* Contact Form */}
-            <Card>
-              <CardContent className="p-8">
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input placeholder="your.email@example.com" type="email" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+    const loginMutation = useMutation({
+        mutationFn: async (data: typeof form.getValues) => {
+            const response = await apiRequest("POST", "/api/users/login", {
+                data: {
+                    email: (data as any).email,
+                    password: (data as any).pwd
+                }
+            });
+            const responseData = await response.json();
+            localStorage.setItem('jwtToken', responseData.token);
+        },
+        onSuccess: () => {
+            form.reset();
+            window.location.href = "/";
+        },
+        onError: (_) => {
+            toast({
+                title: "Error",
+                description: "Failed to login. Please try again.",
+                variant: "destructive",
+            });
+        },
+    });
 
-                    <FormField
-                      control={form.control}
-                      name="pwd"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter password" type="password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+    const onSubmit = (data: any) => {
+        loginMutation.mutate(data);
+    };
 
-                    <Button 
-                      type="submit" 
-                      className="w-full" 
-                      disabled={loginMutation.isPending}
-                    >
-                      {loginMutation.isPending ? 
-                        "Logging in..." : "Login"}
-                    </Button>
-
-                    {/* 🔗 Add Auth Links Below Buttons */}
-                    <div className="flex justify-between text-sm text-blue-600 pt-4">
-                      <Link
-                        href="/register"
-                        className="hover:underline"
-                      >
-                        Don't have an account? Register
-                      </Link>
-                    
-                      <Link
-                        href="/re-pwd"
-                        className="hover:underline"
-                      >
-                        Forgot Password?
-                      </Link>
+    return (
+        <div className="pt-16 min-h-screen">
+            <section className="py-20">
+                <div className="max-w-xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-16">
+                        <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+                            Login
+                        </h1>
                     </div>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-          </div>
+
+                    <div className="gap-12 max-w-xl">
+                        {/* Contact Form */}
+                        <Card>
+                            <CardContent className="p-8">
+                                <Form {...form}>
+                                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                                        <FormField
+                                            control={form.control}
+                                            name="email"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Email</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="your.email@example.com" type="email" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        <FormField
+                                            control={form.control}
+                                            name="pwd"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Password</FormLabel>
+                                                    <FormControl>
+                                                        <Input placeholder="Enter password" type="password" {...field} />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+
+                                        <Button
+                                            type="submit"
+                                            className="w-full"
+                                            disabled={loginMutation.isPending}
+                                        >
+                                            {loginMutation.isPending ?
+                                                "Logging in..." : "Login"}
+                                        </Button>
+
+                                        {/* 🔗 Add Auth Links Below Buttons */}
+                                        <div className="flex justify-between text-sm text-blue-600 pt-4">
+                                            <Link
+                                                href="/register"
+                                                className="hover:underline"
+                                            >
+                                                Don't have an account? Register
+                                            </Link>
+
+                                            <Link
+                                                href="/re-pwd"
+                                                className="hover:underline"
+                                            >
+                                                Forgot Password?
+                                            </Link>
+                                        </div>
+                                    </form>
+                                </Form>
+                            </CardContent>
+                        </Card>
+                    </div>
+                </div>
+            </section>
         </div>
-      </section>
-    </div>
-  );
+    );
 }
