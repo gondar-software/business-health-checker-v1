@@ -59,7 +59,8 @@ export default function AcceptInvite() {
                 data: {
                     name: (data as any).name,
                     role: (data as any).role
-                }
+                },
+                useToken: true
             });
         },
         onSuccess: () => {

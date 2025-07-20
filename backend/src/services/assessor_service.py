@@ -90,21 +90,25 @@ class AssessorService:
         if not existing_assessor.pending:
             raise HTTPException(status_code=400, detail="Assessor already accepted this invitation")
 
-    async def delete_assessor_by_param(self, param: str):
+    async def delete_assessor_by_param(self, email: str, param: str):
         try:
             decrypted_email, customer_id = decrypt_invitation_param(param)
         except Exception as _:
             raise HTTPException(status_code=400, detail="Invalid invitation parameter")
 
+        if email != decrypted_email:
+            raise HTTPException(status_code=400, detail="Email does not match invitation")
+
         customer = await self.customer_repository.get_customer_by_id(customer_id)
         if not customer:
             raise HTTPException(status_code=404, detail="Customer not found")
 
-        assessor = await self.assessor_repository.get_assessor_by_email_and_customer_id(decrypted_email, customer.id)
-        if not assessor:
+        existing_assessor = await self.assessor_repository.get_assessor_by_email_and_customer_id(email, customer.id)
+        if not existing_assessor:
             raise HTTPException(status_code=404, detail="Assessor not found")
-
-        await self.assessor_repository.delete_assessor(assessor)
+        if not existing_assessor.pending:
+            raise HTTPException(status_code=400, detail="Assessor already accepted this invitation")
+        await self.assessor_repository.delete_assessor(existing_assessor)
 
     async def accept_invitation(self, email: str, param: str, assessor: AssessorBase):
         try:

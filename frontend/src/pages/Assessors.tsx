@@ -104,7 +104,7 @@ export default function Assessors() {
                                                 </div>
                                                 <div>
                                                     <h3 className="font-medium text-gray-900 dark:text-white">
-                                                        {assessor.pending ? `${assessor.email}` : `${assessor.name} (${assessor.email})`}
+                                                        {assessor.pending ? `${assessor.email}` : `${assessor.name} (${assessor.email}) - ${assessor.role}`}
                                                     </h3>
                                                     {assessor.pending && <div className="flex items-center space-x-2 mt-1">
                                                         <Badge variant="outline">PENDING</Badge>
