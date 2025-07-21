@@ -127,9 +127,13 @@ class AssessorService:
         if not existing_assessor or not existing_assessor.pending:
             raise HTTPException(status_code=400, detail="Assessor already accepted this invitation")
         
+        user = await self.user_repository.get_by_email(email)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
         existing_assessor.pending = False
         existing_assessor.name = assessor.name
         existing_assessor.role = assessor.role
+        existing_assessor.user_id = user.id
         updated_assessor = await self.assessor_repository.update_assessor(existing_assessor)
         if not updated_assessor:
             raise HTTPException(status_code=400, detail="Failed to update assessor")

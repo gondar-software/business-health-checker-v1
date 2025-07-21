@@ -144,4 +144,9 @@ class UserService:
         assessors = await self.assessor_repository.get_assessors_by_user_id(existing_user.id)
         user_data.assessors = [AssessorOut.model_validate(assessor) for assessor in assessors]
 
+        for assessor in user_data.assessors:
+            if assessor.customer_id:
+                customer_data = await self.customer_repository.get_customer_by_id(assessor.customer_id)
+                assessor.customer = CustomerOut.model_validate(customer_data)
+
         return user_data

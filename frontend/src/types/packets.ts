@@ -15,6 +15,8 @@ export interface Assessor {
   role?: string;
   email: string;
   pending: boolean;
+  customer_id?: number;
+  customer?: Customer;
 }
 
 export interface User {
