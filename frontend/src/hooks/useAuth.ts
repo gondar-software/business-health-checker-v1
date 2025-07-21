@@ -53,6 +53,7 @@ export const useAuth = () => {
     error,
     changeUserIdx,
     logout,
-    refresh
+    refresh,
+    selectedAssessor: user?.assessors.find(assessor => assessor.id === user.user_idx) || null
   };
 }

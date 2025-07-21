@@ -17,16 +17,12 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
     const [selectedSector, setSelectedSector] = useState<string>('private');
     const [selectedIndustry, setSelectedIndustry] = useState<string>('manufacturing');
     const { toast } = useToast();
-    const { user, refresh } = useAuth();
+    const { user, refresh, selectedAssessor } = useAuth();
 
     useEffect(() => {
         if (user?.customer) {
-            const sectorKey = Object.keys(sectorConfig).find(
-                key => sectorConfig[key].name === user.customer!.sector
-            );
-            const industryKey = Object.keys(industryConfig).find(
-                key => industryConfig[key].name === user.customer!.industry
-            );
+            const sectorKey = user.customer!.sector
+            const industryKey = user.customer!.industry
 
             if (sectorKey) setSelectedSector(sectorKey);
             if (industryKey) setSelectedIndustry(industryKey);
@@ -41,8 +37,8 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
         resolver: zodResolver(customerSchema),
         defaultValues: user?.customer || {
             name: 'ABC Corporation Ltd',
-            sector: sectorConfig[selectedSector].name,
-            industry: industryConfig[selectedIndustry].name,
+            sector: selectedSector,
+            industry: selectedIndustry,
             size: 'Medium (50-250 employees)',
             turnover: '£1M - £5M',
         },
@@ -74,13 +70,13 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                 setSelectedAreas(['strategy', 'financial', 'revenue', 'people', 'technology']);
                 break;
             case 'sector':
-                if (sectorConfig[selectedSector]) {
-                    setSelectedAreas(sectorConfig[selectedSector].focus);
+                if (sectorConfig[selectedAssessor?.customer?.sector || ""]) {
+                    setSelectedAreas(sectorConfig[selectedAssessor?.customer?.sector || ""].focus);
                 }
                 break;
             case 'industry':
-                if (industryConfig[selectedIndustry]) {
-                    setSelectedAreas(industryConfig[selectedIndustry].criticalAreas);
+                if (industryConfig[selectedAssessor?.customer?.industry || ""]) {
+                    setSelectedAreas(industryConfig[selectedAssessor?.customer?.industry || ""].criticalAreas);
                 }
                 break;
             default:
@@ -156,13 +152,43 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
     return (
         <div className="max-w-6xl mx-auto p-6">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-3xl font-bold text-gray-800">Client Assessment Setup</h2>
+                <h2 className="text-3xl font-bold text-gray-800">{selectedAssessor ? "Assessment Setup" : "Business Information Setup"}</h2>
             </div>
 
-            <form aria-disabled={!!user?.user_idx && user.user_idx > -1} onSubmit={handleSubmit(onSaveClientInfo)}>
+            {selectedAssessor ? (<div className="bg-white rounded-lg shadow-md p-6 mb-6">
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Business Information</h3>
+                <div className="flex flex-col md:flex-row gap-6 mb-4">
+                    {/* Left: Logo Avatar Uploader */}
+                    <div className="flex flex-col items-center justify-center w-full md:w-[200px]">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Company Logo</label>
+                        <div className="rounded-full w-32 h-32 overflow-hidden border-2 border-dashed border-gray-300">
+                            {selectedAssessor.customer?.logo_url ? (
+                                <img
+                                    src={selectedAssessor.customer?.logo_url}
+                                    alt="Company Logo"
+                                    className="object-cover w-full h-full"
+                                />
+                            ) : (
+                                <div className="flex items-center justify-center w-full h-full text-sm text-gray-500">
+                                    None
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Right: Form Inputs */}
+                    <div className="flex-1 grid">
+                        <label className="text-sm font-medium text-gray-700">Name: {selectedAssessor.customer?.name}</label>
+                        <label className="text-sm font-medium text-gray-700">Size: {selectedAssessor.customer?.size}</label>
+                        <label className="text-sm font-medium text-gray-700">Turnover: {selectedAssessor.customer?.turnover}</label>
+                        <label className="text-sm font-medium text-gray-700">Sector: {sectorConfig[selectedAssessor.customer?.sector || ""]?.name}</label>
+                        <label className="text-sm font-medium text-gray-700">Industry: {industryConfig[selectedAssessor.customer?.industry || ""]?.name}</label>
+                    </div>
+                </div>
+            </div>) : (<form onSubmit={handleSubmit(onSaveClientInfo)}>
                 {/* Client Information */}
                 <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Client Information</h3>
+                    <h3 className="text-xl font-semibold text-gray-800 mb-4">Business Information</h3>
                     <div className="flex flex-col md:flex-row gap-6 mb-4">
                         {/* Left: Logo Avatar Uploader */}
                         <div className="flex flex-col items-center justify-center w-full md:w-[200px]">
@@ -261,7 +287,7 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                                 key={key}
                                 onClick={() => {
                                     setSelectedSector(key);
-                                    setValue("sector", sector.name);
+                                    setValue("sector", key);
                                 }}
                                 className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${selectedSector === key
                                     ? 'border-blue-500 bg-blue-50'
@@ -294,7 +320,7 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                                 key={key}
                                 onClick={() => {
                                     setSelectedIndustry(key);
-                                    setValue("industry", industry.name);
+                                    setValue("industry", key);
                                 }}
                                 className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${selectedIndustry === key
                                     ? 'border-green-500 bg-green-50'
@@ -322,10 +348,10 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                         {saveClientMutation.isPending ? "Saving" : "Save"}
                     </Button>
                 </div>}
-            </form>
+            </form>)}
 
             {/* Business Areas Selection */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+            {selectedAssessor && <div className="bg-white rounded-lg shadow-md p-6 mb-6">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4">Select Business Areas to Assess</h3>
 
                 <div className="mb-6">
@@ -353,13 +379,13 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                             onClick={() => selectPresetAreas('sector')}
                             className="px-3 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 text-sm"
                         >
-                            {sectorConfig[selectedSector]?.name} Focus ({sectorConfig[selectedSector]?.focus.length})
+                            {sectorConfig[selectedAssessor?.customer?.sector || ""]?.name} Focus ({sectorConfig[selectedAssessor?.customer?.sector || ""]?.focus?.length})
                         </button>
                         <button
                             onClick={() => selectPresetAreas('industry')}
                             className="px-3 py-1 bg-pink-100 text-pink-700 rounded hover:bg-pink-200 text-sm"
                         >
-                            {industryConfig[selectedIndustry]?.name} Critical ({industryConfig[selectedIndustry]?.criticalAreas.length})
+                            {industryConfig[selectedAssessor?.customer?.industry || ""]?.name} Critical ({industryConfig[selectedAssessor?.customer?.industry || ""]?.criticalAreas?.length})
                         </button>
                     </div>
                 </div>
@@ -367,8 +393,8 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {Object.entries(businessAreas).map(([key, area]) => {
                         const isSelected = selectedAreas.includes(key);
-                        const isCritical = industryConfig[selectedIndustry]?.criticalAreas.includes(key);
-                        const isFocus = sectorConfig[selectedSector]?.focus.includes(key);
+                        const isCritical = industryConfig[selectedAssessor.customer?.industry || ""]?.criticalAreas.includes(key);
+                        const isFocus = sectorConfig[selectedAssessor.customer?.sector || ""]?.focus.includes(key);
                         const IconComponent = area.icon;
 
                         return (
@@ -427,7 +453,7 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                         <span className="font-medium">{Math.ceil(selectedAreas.length * 8)} - {Math.ceil(selectedAreas.length * 12)} minutes</span>
                     </div>
                 </div>
-            </div>
+            </div>}
 
             {/* Assessment Configuration Summary */}
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
@@ -443,7 +469,7 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                             <li>• <strong>Turnover:</strong> {customerForm.getValues().turnover}</li>
                         </ul>
                     </div>
-                    <div>
+                    {selectedAssessor && <div>
                         <h4 className="font-medium text-blue-800 mb-2">Assessment Scope:</h4>
                         <ul className="text-blue-700 space-y-1">
                             <li>• <strong>Areas:</strong> {selectedAreas.length} selected</li>
@@ -451,7 +477,7 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                             <li>• <strong>Duration:</strong> {Math.ceil(selectedAreas.length * 10)} min est.</li>
                             <li>• <strong>Focus:</strong> {selectedSector === 'private' ? 'Performance' : selectedSector === 'public' ? 'Service' : 'Impact'} driven</li>
                         </ul>
-                    </div>
+                    </div>}
                 </div>
 
                 {selectedAreas.length < 3 && (

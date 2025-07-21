@@ -13,10 +13,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Menu, X } from "lucide-react";
 
 export default function Header() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, changeUserIdx } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const toggleMenu = () => setMobileMenuOpen(!mobileMenuOpen);
+
+  const handleSelectChange = (value: string) => {
+    if (user) {
+      changeUserIdx(parseInt(value));
+    }
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
@@ -64,14 +70,14 @@ export default function Header() {
           <div className="hidden lg:flex items-center space-x-4">
 
             {user && (
-              <Select defaultValue="-1">
+              <Select defaultValue="-1" onValueChange={handleSelectChange}>
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="Select Business" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="-1">My Business</SelectItem>
-                  {user.assessors?.map((assessor, index) => (
-                    <SelectItem key={index} value={`${index}`}>
+                  {user.assessors?.map((assessor) => (
+                    <SelectItem key={assessor.id} value={`${assessor.id}`}>
                       <div className="flex items-center">
                         <Avatar className="w-5 h-5 border-2 border-primary">
                           <AvatarImage src={assessor.customer?.logo_url} />
@@ -126,8 +132,8 @@ export default function Header() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="-1">My Business</SelectItem>
-                  {user.assessors?.map((assessor, index) => (
-                    <SelectItem key={index} value={`${index}`}>
+                  {user.assessors?.map((assessor) => (
+                    <SelectItem key={assessor.id} value={`${assessor.id}`}>
                       <div className="flex items-center">
                         <Avatar className="w-5 h-5 border-2 border-primary">
                           <AvatarImage src={assessor.customer?.logo_url} />
