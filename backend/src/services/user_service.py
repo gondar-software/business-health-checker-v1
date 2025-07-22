@@ -142,7 +142,7 @@ class UserService:
             user_data.customer = CustomerOut.model_validate(customer)
 
         assessors = await self.assessor_repository.get_assessors_by_user_id(existing_user.id)
-        user_data.assessors = [AssessorOut.model_validate(assessor) for assessor in assessors]
+        user_data.assessors = [AssessorOut.model_validate(assessor) for assessor in assessors if not assessor.pending]
 
         for assessor in user_data.assessors:
             if assessor.customer_id:
