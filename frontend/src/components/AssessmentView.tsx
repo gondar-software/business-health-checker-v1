@@ -1,9 +1,11 @@
 import React from 'react';
 import { businessAreas } from "@/constants/questions";
 import { AssessmentViewParams, DimensionData, RAGStatus } from "@/types/params";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 // Assessment View Component
-const AssessmentView: React.FC<AssessmentViewParams> = ({ areaKey, setCurrentView, assessmentData, setAssessmentData }) => {
+const AssessmentView: React.FC<AssessmentViewParams> = ({ areaKey, setCurrentView, assessmentData, setAssessmentData, goToNextArea }) => {
     const area = businessAreas[areaKey];
     const IconComponent = area.icon;
 
@@ -24,7 +26,7 @@ const AssessmentView: React.FC<AssessmentViewParams> = ({ areaKey, setCurrentVie
         let answeredQuestions = 0;
 
         questions.forEach((_, index) => {
-            if (responses[index] !== undefined) {
+            if (responses[index] !== undefined && responses[index] > 0) {
                 totalScore += responses[index];
                 answeredQuestions++;
             }
@@ -83,16 +85,16 @@ const AssessmentView: React.FC<AssessmentViewParams> = ({ areaKey, setCurrentVie
 
     // Handle assessment responses using 0-10 scale
     const handleResponse = (areaKey: string, dimensionKey: string, questionIndex: number, value: string): void => {
-        setAssessmentData(prev => ({
-            ...prev,
+        setAssessmentData({
+            ...assessmentData,
             [areaKey]: {
-                ...prev[areaKey],
+                ...assessmentData[areaKey],
                 [dimensionKey as keyof DimensionData]: {
-                    ...prev[areaKey]?.[dimensionKey as keyof DimensionData],
+                    ...assessmentData[areaKey]?.[dimensionKey as keyof DimensionData],
                     [questionIndex]: parseInt(value)
                 }
             }
-        }));
+        });
     };
 
     return (
@@ -157,10 +159,11 @@ const AssessmentView: React.FC<AssessmentViewParams> = ({ areaKey, setCurrentVie
                                             className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                                             style={{
                                                 background: `linear-gradient(to right, 
-                            #ef4444 0%, #ef4444 25%, 
-                            #f59e0b 25%, #f59e0b 50%, 
-                            #3b82f6 50%, #3b82f6 75%, 
-                            #10b981 75%, #10b981 100%)`
+                            #888888 0%, #888888 20%,
+                            #ef4444 20%, #ef4444 40%, 
+                            #f59e0b 40%, #f59e0b 60%, 
+                            #3b82f6 60%, #3b82f6 80%, 
+                            #10b981 80%, #10b981 100%)`
                                             }}
                                         />
                                         <span className="text-sm text-gray-500 min-w-[20px]">10</span>
@@ -174,12 +177,22 @@ const AssessmentView: React.FC<AssessmentViewParams> = ({ areaKey, setCurrentVie
                                         <span className="font-medium">Current Rating: </span>
                                         {(() => {
                                             const score = (assessmentData[areaKey]?.[dimKey as keyof DimensionData]?.[index] || 0) * 10;
-                                            if (score >= 75) return <span className="text-green-600 font-medium">Substantial Assurance Level</span>;
-                                            if (score >= 50) return <span className="text-blue-600 font-medium">Reasonable Assurance Level</span>;
-                                            if (score >= 25) return <span className="text-yellow-600 font-medium">Limited Assurance Level</span>;
-                                            return <span className="text-red-600 font-medium">No Assurance Level</span>;
+                                            if (score >= 80) return <span className="text-green-600 font-medium">Excellent/Optimized</span>;
+                                            if (score >= 60) return <span className="text-blue-600 font-medium">Good/Mature</span>;
+                                            if (score >= 40) return <span className="text-yellow-600 font-medium">Adequate/Developing</span>;
+                                            if (score >= 20) return <span className="text-red-600 font-medium">Weak/Basic</span>;
+                                            return <span className="text-gray-600 font-medium">Poor/Non-existent</span>;
                                         })()}
                                     </div>
+
+                                    {(assessmentData[areaKey]?.[dimKey as keyof DimensionData]?.[index] || 0) * 10 > 0 && (
+                                        <div className="flex items-center mt-2">
+                                            <Textarea
+                                                placeholder="Additional comments or context (optional)"
+                                                className="w-full"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -232,6 +245,14 @@ const AssessmentView: React.FC<AssessmentViewParams> = ({ areaKey, setCurrentVie
                                     Object.values(area.dimensions).reduce((total, dim) => total + dim.questions.length, 0)) * 100}%`
                             }}
                         ></div>
+                    </div>
+                    <div className="flex justify-start gap-2 mt-12">
+                        <Button variant="default">
+                            Finish Assessment
+                        </Button>
+                        <Button variant="outline" onClick={() => goToNextArea ? goToNextArea() : setCurrentView('dashboard')}>
+                            Next Area
+                        </Button>
                     </div>
                 </div>
             </div>

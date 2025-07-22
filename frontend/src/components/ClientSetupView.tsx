@@ -12,12 +12,14 @@ import { customerSchema } from "@/types/schema";
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from '@/lib/queryClient';
+import { useUserIdx } from '@/global/interface';
 
 const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setSelectedAreas, selectedAreas }) => {
     const [selectedSector, setSelectedSector] = useState<string>('private');
     const [selectedIndustry, setSelectedIndustry] = useState<string>('manufacturing');
     const { toast } = useToast();
     const { user, refresh, selectedAssessor } = useAuth();
+    const { userIdx } = useUserIdx();
 
     useEffect(() => {
         if (user?.customer) {
@@ -51,10 +53,10 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
     const watchTurnover = watch('turnover');
 
     const handleAreaToggle = (areaKey: string): void => {
-        setSelectedAreas(prev =>
-            prev.includes(areaKey)
-                ? prev.filter(key => key !== areaKey)
-                : [...prev, areaKey]
+        setSelectedAreas(
+            selectedAreas.includes(areaKey)
+                ? selectedAreas.filter(key => key !== areaKey)
+                : [...selectedAreas, areaKey]
         );
     };
 
@@ -208,14 +210,14 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                                         {logoUploadMutation.isPending ? (
                                             <span>Uploading...</span>
                                         ) : (
-                                            <span>{(!!user?.user_idx && user.user_idx > -1) ? "None" : "Upload"}</span>
+                                            <span>{userIdx > -1 ? "None" : "Upload"}</span>
                                         )}
                                     </div>
                                 )}
                                 <input
                                     id="logo-upload"
                                     type="file"
-                                    disabled={(!!user?.user_idx && user.user_idx > -1) || logoUploadMutation.isPending}
+                                    disabled={userIdx > -1 || logoUploadMutation.isPending}
                                     accept="image/*"
                                     onChange={onLogoUpload}
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
@@ -343,7 +345,7 @@ const ClientSetupView: React.FC<ClientSetupViewParams> = ({ setCurrentView, setS
                     </div>
                 </div>
 
-                {(!user?.user_idx || user?.user_idx == -1) && <div className="flex flex-col justify-end w-full items-end mb-6">
+                {userIdx === -1 && <div className="flex flex-col justify-end w-full items-end mb-6">
                     <Button type="submit" disabled={saveClientMutation.isPending} className="w-1/4">
                         {saveClientMutation.isPending ? "Saving" : "Save"}
                     </Button>

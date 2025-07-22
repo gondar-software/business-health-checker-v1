@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { User } from "@/types/packets";
 import { apiRequest } from "@/lib/queryClient";
+import { useUserIdx } from "@/global/interface";
 
 const AUTH_KEY = 'auth';
 
@@ -9,17 +10,14 @@ async function fetchUser() {
     useToken: true
   });
   if (response.status === 200) {
-    const userData = await response.json();
-    return {
-      ...userData,
-      user_idx: -1
-    }
+    return await response.json();
   }
   else return null;
 }
 
 export const useAuth = () => {
   const queryClient = useQueryClient();
+  const { userIdx } = useUserIdx();
   
   const { data: user, isLoading, error } = useQuery<User>({
     queryKey: [AUTH_KEY, 'user'],
@@ -37,23 +35,13 @@ export const useAuth = () => {
     queryClient.invalidateQueries({ queryKey: [AUTH_KEY, 'user'] });
   };
 
-  const changeUserIdx = (userIdx: number) => {
-    if (user) {
-      queryClient.setQueryData([AUTH_KEY, 'user'], {
-        ...user,
-        user_idx: userIdx
-      });
-    }
-  };
-
   return {
     user,
     isLoading,
     isAuthenticated: !!user,
     error,
-    changeUserIdx,
     logout,
     refresh,
-    selectedAssessor: user?.assessors.find(assessor => assessor.id === user.user_idx) || null
+    selectedAssessor: user?.assessors.find(assessor => assessor.id === userIdx) || null
   };
 }

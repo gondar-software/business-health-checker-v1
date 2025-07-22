@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useLocation } from "wouter";
-import { ViewType, AssessmentData } from "@/types/params";
 import ClientSetupView from "@/components/ClientSetupView";
 import AssessmentView from "@/components/AssessmentView";
 import DashboardView from "@/components/DashboardView";
 import { useAuth } from "@/hooks/useAuth";
+import { useCurrentView, useSelectedAreas, useAssessmentData } from '@/global/interface';
 
 const BusinessHealthDashboard: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
@@ -19,24 +19,18 @@ const BusinessHealthDashboard: React.FC = () => {
     return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
-  const [currentView, setCurrentView] = useState<ViewType>('setup');
-  const [selectedAreas, setSelectedAreas] = useState<string[]>([
-    'governance',
-    'strategy',
-    'financial',
-    'cashflow',
-    'revenue',
-    'procurement',
-    'people',
-    'technology',
-    'compliance',
-    'customer',
-    'operational',
-    'sustainability'
-  ]);
-  
-  // Update sample assessment data to use 0-10 scale
-  const [assessmentData, setAssessmentData] = useState<AssessmentData>({});
+  const { currentView, setCurrentView } = useCurrentView();
+  const { selectedAreas, setSelectedAreas } = useSelectedAreas();
+  const { assessmentData, setAssessmentData } = useAssessmentData();
+
+  const goToNextArea = () => {
+    const currentIndex = selectedAreas.indexOf(currentView);
+    if (currentIndex < selectedAreas.length - 1) {
+      setCurrentView(selectedAreas[currentIndex + 1]);
+    } else {
+      setCurrentView('dashboard');
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 mt-16">
@@ -44,18 +38,22 @@ const BusinessHealthDashboard: React.FC = () => {
         <ClientSetupView
           setCurrentView={setCurrentView}
           setSelectedAreas={setSelectedAreas}
-          selectedAreas={selectedAreas} />
+          selectedAreas={selectedAreas} 
+        />
       ) : currentView === 'dashboard' ? (
         <DashboardView
           setCurrentView={setCurrentView}
           selectedAreas={selectedAreas}
-          assessmentData={assessmentData} />
+          assessmentData={assessmentData} 
+        />
       ) : (
         <AssessmentView
           areaKey={currentView}
           setCurrentView={setCurrentView}
           assessmentData={assessmentData}
-          setAssessmentData={setAssessmentData} />
+          setAssessmentData={setAssessmentData}
+          goToNextArea={goToNextArea}
+        />
       )}
     </div>
   );

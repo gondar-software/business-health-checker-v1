@@ -11,16 +11,18 @@ import {
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Menu, X } from "lucide-react";
+import { useUserIdx } from "@/global/interface";
 
 export default function Header() {
-  const { user, isAuthenticated, logout, changeUserIdx } = useAuth();
+  const { userIdx, setUserIdx } = useUserIdx();
+  const { user, isAuthenticated, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const toggleMenu = () => setMobileMenuOpen(!mobileMenuOpen);
 
   const handleSelectChange = (value: string) => {
     if (user) {
-      changeUserIdx(parseInt(value));
+      setUserIdx(parseInt(value));
     }
   };
 
@@ -40,7 +42,7 @@ export default function Header() {
               </span>
             </Link>
             <div className="hidden lg:flex space-x-4 px-16">
-                {(user && (!user.user_idx || user.user_idx === -1)) && user.customer && (
+                {user && userIdx === -1 && user.customer && (
                 <Link
                     href="/assessors"
                     className="text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400"
@@ -70,7 +72,7 @@ export default function Header() {
           <div className="hidden lg:flex items-center space-x-4">
 
             {user && (
-              <Select defaultValue="-1" onValueChange={handleSelectChange}>
+              <Select defaultValue={`${userIdx}`} onValueChange={handleSelectChange}>
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="Select Business" />
                 </SelectTrigger>
@@ -107,7 +109,7 @@ export default function Header() {
       {/* Mobile Dropdown */}
       {mobileMenuOpen && (
         <div className="lg:hidden px-2 py-2 space-y-2 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-gray-700">
-          {(user && (!user.user_idx || user.user_idx === -1)) && user.customer && (
+          {user && userIdx === -1 && user.customer && (
             <Link
               href="/assessors"
               className="block px-3 text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400"
@@ -126,7 +128,7 @@ export default function Header() {
 
           {user && (
             <div className="mt-2">
-              <Select defaultValue="-1">
+              <Select defaultValue={`${userIdx}`} onValueChange={handleSelectChange}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Business" />
                 </SelectTrigger>

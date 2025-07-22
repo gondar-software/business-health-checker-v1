@@ -76,20 +76,21 @@ export interface IndustryConfigs {
 export type ViewType = 'setup' | 'dashboard' | string;
 
 export interface ClientSetupViewParams {
-  setCurrentView: React.Dispatch<React.SetStateAction<ViewType>>;
-  setSelectedAreas: React.Dispatch<React.SetStateAction<string[]>>;
+  setCurrentView: (currentView: ViewType) => { type: string; payload: string; };
+  setSelectedAreas: (selectedAreas: string[]) => { type: string; payload: string[]; };
   selectedAreas: string[];
 }
 
 export interface AssessmentViewParams {
   areaKey: string;
-  setCurrentView: React.Dispatch<React.SetStateAction<ViewType>>;
+  setCurrentView: (currentView: ViewType) => { type: string; payload: string; };
   assessmentData: AssessmentData;
-  setAssessmentData: React.Dispatch<React.SetStateAction<AssessmentData>>;
+  setAssessmentData: (assessmentData: AssessmentData) => { type: string; payload: AssessmentData; };
+  goToNextArea?: () => void;
 }
 
 export interface DashboardViewParams {
-  setCurrentView: React.Dispatch<React.SetStateAction<ViewType>>;
+  setCurrentView: (currentView: ViewType) => { type: string; payload: string; };
   selectedAreas: string[];
   assessmentData: AssessmentData;
 }
