@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,8 +10,21 @@ import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogFooter } f
 import { useAssessors } from "@/hooks/useAssessors";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Assessors() {
+    const { user, isAuthenticated, isLoading } = useAuth();
+    const [, navigate] = useLocation();
+
+    if (!isAuthenticated || !user) {
+        navigate('/login');
+        return null;
+    }
+
+    if (isLoading) {
+        return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    }
+
     const { assessors, refresh } = useAssessors();
     const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
     const [email, setEmail] = useState("");

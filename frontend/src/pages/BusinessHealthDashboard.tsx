@@ -1,10 +1,24 @@
 import React, { useState } from 'react';
+import { useLocation } from "wouter";
 import { ViewType, AssessmentData } from "@/types/params";
 import ClientSetupView from "@/components/ClientSetupView";
 import AssessmentView from "@/components/AssessmentView";
 import DashboardView from "@/components/DashboardView";
+import { useAuth } from "@/hooks/useAuth";
 
 const BusinessHealthDashboard: React.FC = () => {
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const [, navigate] = useLocation();
+
+  if (!isAuthenticated || !user) {
+    navigate('/login');
+    return null;
+  }
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+  }
+
   const [currentView, setCurrentView] = useState<ViewType>('setup');
   const [selectedAreas, setSelectedAreas] = useState<string[]>([
     'governance',

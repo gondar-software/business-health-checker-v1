@@ -1,3 +1,4 @@
+import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,17 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Accounts() {
-    const { user, refresh } = useAuth();
+    const { user, isAuthenticated, isLoading, refresh } = useAuth();
+    const [, navigate] = useLocation();
+
+    if (!isAuthenticated || !user) {
+        navigate('/login');
+        return null;
+    }
+
+    if (isLoading) {
+        return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    }
     const { toast } = useToast();
 
     const deleteAssessorMutation = useMutation({
