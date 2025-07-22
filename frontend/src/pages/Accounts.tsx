@@ -11,7 +11,7 @@ export default function Accounts() {
     const { user, isAuthenticated, isLoading, refresh } = useAuth();
     const [, navigate] = useLocation();
 
-    if (!isAuthenticated || !user) {
+    if (!isAuthenticated) {
         navigate('/login');
         return null;
     }

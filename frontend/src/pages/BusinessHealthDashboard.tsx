@@ -7,10 +7,10 @@ import DashboardView from "@/components/DashboardView";
 import { useAuth } from "@/hooks/useAuth";
 
 const BusinessHealthDashboard: React.FC = () => {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const [, navigate] = useLocation();
 
-  if (!isAuthenticated || !user) {
+  if (!isAuthenticated) {
     navigate('/login');
     return null;
   }

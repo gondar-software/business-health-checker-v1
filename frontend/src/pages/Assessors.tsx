@@ -13,10 +13,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function Assessors() {
-    const { user, isAuthenticated, isLoading } = useAuth();
+    const { isAuthenticated, isLoading } = useAuth();
     const [, navigate] = useLocation();
 
-    if (!isAuthenticated || !user) {
+    if (!isAuthenticated) {
         navigate('/login');
         return null;
     }
